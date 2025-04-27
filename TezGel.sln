@@ -1,0 +1,46 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TezGel.API", "TezGel.API\TezGel.API.csproj", "{FB73CF2F-C309-492B-B154-8E953B8D7DFF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TezGel.Application", "TezGel.Application\TezGel.Application.csproj", "{A51FC665-DE74-4586-8C53-D5C43BCC4C91}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TezGel.Domain", "TezGel.Domain\TezGel.Domain.csproj", "{6B5F1866-09E0-4574-85D7-F6B46FB47CA1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TezGel.Infrastructure", "TezGel.Infrastructure\TezGel.Infrastructure.csproj", "{075A6063-4148-49D8-9CC8-0F7570D0BDBF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TezGel.Persistence", "TezGel.Persistence\TezGel.Persistence.csproj", "{80063120-7B3D-4198-B7CF-86D55CC5486C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FB73CF2F-C309-492B-B154-8E953B8D7DFF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB73CF2F-C309-492B-B154-8E953B8D7DFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB73CF2F-C309-492B-B154-8E953B8D7DFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB73CF2F-C309-492B-B154-8E953B8D7DFF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A51FC665-DE74-4586-8C53-D5C43BCC4C91}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A51FC665-DE74-4586-8C53-D5C43BCC4C91}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A51FC665-DE74-4586-8C53-D5C43BCC4C91}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A51FC665-DE74-4586-8C53-D5C43BCC4C91}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B5F1866-09E0-4574-85D7-F6B46FB47CA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B5F1866-09E0-4574-85D7-F6B46FB47CA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B5F1866-09E0-4574-85D7-F6B46FB47CA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B5F1866-09E0-4574-85D7-F6B46FB47CA1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{075A6063-4148-49D8-9CC8-0F7570D0BDBF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{075A6063-4148-49D8-9CC8-0F7570D0BDBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{075A6063-4148-49D8-9CC8-0F7570D0BDBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{075A6063-4148-49D8-9CC8-0F7570D0BDBF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{80063120-7B3D-4198-B7CF-86D55CC5486C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{80063120-7B3D-4198-B7CF-86D55CC5486C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{80063120-7B3D-4198-B7CF-86D55CC5486C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{80063120-7B3D-4198-B7CF-86D55CC5486C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

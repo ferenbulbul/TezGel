@@ -1,0 +1,36 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "TezGel.Application/1.0.0": {
+        "dependencies": {
+          "TezGel.Domain": "1.0.0"
+        },
+        "runtime": {
+          "TezGel.Application.dll": {}
+        }
+      },
+      "TezGel.Domain/1.0.0": {
+        "runtime": {
+          "TezGel.Domain.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "TezGel.Application/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "TezGel.Domain/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

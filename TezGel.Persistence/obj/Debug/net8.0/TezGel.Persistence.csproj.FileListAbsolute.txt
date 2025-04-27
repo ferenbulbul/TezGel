@@ -1,0 +1,17 @@
+/Users/erenbulbul/TezGel/TezGel.Persistence/bin/Debug/net8.0/TezGel.Persistence.deps.json
+/Users/erenbulbul/TezGel/TezGel.Persistence/bin/Debug/net8.0/TezGel.Persistence.runtimeconfig.json
+/Users/erenbulbul/TezGel/TezGel.Persistence/bin/Debug/net8.0/TezGel.Persistence.dll
+/Users/erenbulbul/TezGel/TezGel.Persistence/bin/Debug/net8.0/TezGel.Persistence.pdb
+/Users/erenbulbul/TezGel/TezGel.Persistence/bin/Debug/net8.0/TezGel.Domain.dll
+/Users/erenbulbul/TezGel/TezGel.Persistence/bin/Debug/net8.0/TezGel.Domain.pdb
+/Users/erenbulbul/TezGel/TezGel.Persistence/obj/Debug/net8.0/TezGel.Persistence.csproj.AssemblyReference.cache
+/Users/erenbulbul/TezGel/TezGel.Persistence/obj/Debug/net8.0/TezGel.Persistence.GeneratedMSBuildEditorConfig.editorconfig
+/Users/erenbulbul/TezGel/TezGel.Persistence/obj/Debug/net8.0/TezGel.Persistence.AssemblyInfoInputs.cache
+/Users/erenbulbul/TezGel/TezGel.Persistence/obj/Debug/net8.0/TezGel.Persistence.AssemblyInfo.cs
+/Users/erenbulbul/TezGel/TezGel.Persistence/obj/Debug/net8.0/TezGel.Persistence.csproj.CoreCompileInputs.cache
+/Users/erenbulbul/TezGel/TezGel.Persistence/obj/Debug/net8.0/TezGel.P.E4154B37.Up2Date
+/Users/erenbulbul/TezGel/TezGel.Persistence/obj/Debug/net8.0/TezGel.Persistence.dll
+/Users/erenbulbul/TezGel/TezGel.Persistence/obj/Debug/net8.0/refint/TezGel.Persistence.dll
+/Users/erenbulbul/TezGel/TezGel.Persistence/obj/Debug/net8.0/TezGel.Persistence.pdb
+/Users/erenbulbul/TezGel/TezGel.Persistence/obj/Debug/net8.0/TezGel.Persistence.genruntimeconfig.cache
+/Users/erenbulbul/TezGel/TezGel.Persistence/obj/Debug/net8.0/ref/TezGel.Persistence.dll

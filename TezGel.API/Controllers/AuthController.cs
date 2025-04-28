@@ -15,7 +15,7 @@ namespace TezGel.API.Controllers
         public AuthController(IAuthService authService, IMailService mailService)
         {
             _authService = authService;
-            _mailService= mailService;
+            _mailService = mailService;
         }
 
         [HttpPost("register-customer")]
@@ -39,13 +39,14 @@ namespace TezGel.API.Controllers
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
 
-            var (accessToken, refreshToken) = await _authService.LoginAsync(request.Username, request.Password);
+            var (accessToken, refreshToken, emailConfirmed) = await _authService.LoginAsync(request.Username, request.Password);
 
 
             var response = new
             {
                 AccessToken = accessToken,
-                RefreshToken = refreshToken
+                RefreshToken = refreshToken,
+                EmailConfirmed = emailConfirmed
             };
 
             return Ok(ApiResponse<object>.SuccessResponse(response, "Login successful."));
@@ -77,6 +78,34 @@ namespace TezGel.API.Controllers
         {
             await _mailService.SendEmailAsync("ferenbulbul@gmail.com", "Test Başlık", "Bu bir test epostasıdır.");
             return Ok("Test mail gönderildi.");
+        }
+
+        [HttpPost("verify-email-code")]
+        public async Task<IActionResult> VerifyEmailCode([FromBody] VerifyEmailCodeRequest request)
+        {
+            try
+            {
+                await _authService.VerifyEmailCodeAsync(request.Email, request.Code);
+                return Ok(ApiResponse<string>.SuccessResponse(null, "E-posta doğrulandı."));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<string>.FailResponse(ex.Message));
+            }
+        }
+
+        [HttpPost("create-email-code")]
+        public async Task<IActionResult> CreateEmailCode([FromQuery] string email)
+        {
+            try
+            {
+                await _authService.CreateEmailCodeAsync(email);
+                return Ok(ApiResponse<string>.SuccessResponse(null, "E-posta kodu gönderildi."));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<string>.FailResponse(ex.Message));
+            }
         }
     }
 }

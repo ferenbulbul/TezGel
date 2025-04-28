@@ -15,6 +15,8 @@ namespace TezGel.Domain.Entities
         public double Longitute { get; set; }
         public double Latitude { get; set; }
         public DateTime? RefreshTokenExpireDate { get; set; }
+        public string? EmailVerificationCode { get; set; }
+        public DateTime? EmailVerificationExpireTime { get; set; }
         public CustomerUser? CustomerUser { get; set; }
         public BusinessUser? BusinessUser { get; set; }
 

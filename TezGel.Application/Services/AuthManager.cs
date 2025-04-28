@@ -20,19 +20,21 @@ namespace TezGel.Application.Services
         private readonly ITokenService _tokenService;
         private readonly ICustomerUserRepository _customerUserRepository;
         private readonly IBusinessUserRepository _businessUserRepository;
+        IMailService _mailService;
         private readonly IConfiguration _configuration;
 
         public AuthManager(
             UserManager<AppUser> userManager,
             ICustomerUserRepository customerUserRepository,
             IBusinessUserRepository businessUserRepository,
-            IConfiguration configuration, ITokenService tokenService)
+            IConfiguration configuration, ITokenService tokenService, IMailService mailService)
         {
             _userManager = userManager;
             _customerUserRepository = customerUserRepository;
             _businessUserRepository = businessUserRepository;
             _configuration = configuration;
             _tokenService = tokenService;
+            _mailService = mailService;
         }
 
         public async Task RegisterCustomerAsync(CustomerRegisterRequest dto)
@@ -83,15 +85,19 @@ namespace TezGel.Application.Services
                 CompanyName = dto.CompanyName,
                 CompanyType = dto.CompanyType
             };
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+
+
 
             await _businessUserRepository.AddAsync(business);
         }
 
-        public async Task<(string AccessToken, string RefreshToken)> LoginAsync(string email, string password)
+        public async Task<(string AccessToken, string RefreshToken, bool EmailConfirmed)> LoginAsync(string email, string password)
         {
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null || !await _userManager.CheckPasswordAsync(user, password))
                 throw new Exception("Geçersiz e mail adresi  veya şifre hatalı.");
+
 
             var (accessToken, refreshToken) = await _tokenService.CreateTokenAsync(user);
 
@@ -99,7 +105,7 @@ namespace TezGel.Application.Services
             user.RefreshTokenExpireDate = DateTime.UtcNow.AddDays(7);
             await _userManager.UpdateAsync(user);
 
-            return (accessToken, refreshToken);
+            return (accessToken, refreshToken, user.EmailConfirmed);
         }
 
         public async Task<(string AccessToken, string RefreshToken)> RefreshTokenAsync(string refreshToken)
@@ -120,6 +126,40 @@ namespace TezGel.Application.Services
             return (newAccessToken, newRefreshToken);
         }
 
+        public async Task VerifyEmailCodeAsync(string email, string code)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                throw new Exception("Kullanıcı bulunamadı.");
+
+            if (user.EmailVerificationCode != code)
+                throw new Exception("Kod yanlış.");
+
+            if (user.EmailVerificationExpireTime == null || user.EmailVerificationExpireTime < DateTime.UtcNow)
+                throw new Exception("Kodun süresi dolmuş.");
+
+            user.EmailConfirmed = true;
+            user.EmailVerificationCode = null;
+            user.EmailVerificationExpireTime = null;
+            await _userManager.UpdateAsync(user);
+        }
+
+        public async Task CreateEmailCodeAsync(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                throw new Exception("Kullanıcı bulunamadı.");
+
+
+
+            var verificationCode = new Random().Next(100000, 999999).ToString();
+            user.EmailVerificationCode = verificationCode;
+            user.EmailVerificationExpireTime = DateTime.UtcNow.AddMinutes(5);
+            await _userManager.UpdateAsync(user);
+
+            await _mailService.SendEmailAsync(email, "Email Doğrulama Kodu", $"Doğrulama kodunuz: {verificationCode}");
+        }
     }
+
 
 }

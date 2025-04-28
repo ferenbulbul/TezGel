@@ -15,3 +15,6 @@
 /Users/erenbulbul/TezGel/TezGel.Persistence/obj/Debug/net8.0/TezGel.Persistence.pdb
 /Users/erenbulbul/TezGel/TezGel.Persistence/obj/Debug/net8.0/TezGel.Persistence.genruntimeconfig.cache
 /Users/erenbulbul/TezGel/TezGel.Persistence/obj/Debug/net8.0/ref/TezGel.Persistence.dll
+/Users/erenbulbul/TezGel/TezGel.Persistence/obj/Debug/net8.0/TezGel.Persistence.sourcelink.json
+/Users/erenbulbul/TezGel/TezGel.Persistence/bin/Debug/net8.0/TezGel.Application.dll
+/Users/erenbulbul/TezGel/TezGel.Persistence/bin/Debug/net8.0/TezGel.Application.pdb

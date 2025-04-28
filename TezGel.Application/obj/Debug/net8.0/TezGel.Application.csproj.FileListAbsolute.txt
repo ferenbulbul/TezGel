@@ -13,3 +13,4 @@
 /Users/erenbulbul/TezGel/TezGel.Application/obj/Debug/net8.0/refint/TezGel.Application.dll
 /Users/erenbulbul/TezGel/TezGel.Application/obj/Debug/net8.0/TezGel.Application.pdb
 /Users/erenbulbul/TezGel/TezGel.Application/obj/Debug/net8.0/ref/TezGel.Application.dll
+/Users/erenbulbul/TezGel/TezGel.Application/obj/Debug/net8.0/TezGel.Application.sourcelink.json

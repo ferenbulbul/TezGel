@@ -15,7 +15,8 @@ namespace TezGel.Application.Validators.Auth
             RuleFor(x => x.Password).NotEmpty().MinimumLength(6);
             RuleFor(x => x.UserName).NotEmpty();
             RuleFor(x => x.CompanyName).NotEmpty();
-            RuleFor(x => x.TaxNumber).NotEmpty().Length(10).WithMessage("Vergi numarası 10 karakter olmalıdır.");
+            RuleFor(x => x.CompanyType).NotEmpty();
+            
         }
     }
 }

@@ -6,11 +6,13 @@ using TezGel.Domain.Common;
 
 namespace TezGel.Domain.Entities
 {
-    public class BusinessUser:BaseEntity
+    public class BusinessUser : BaseEntity
     {
         public Guid Id { get; set; }  // PK ve FK (AppUser.Id)
         public string CompanyName { get; set; }
-        public string TaxNumber { get; set; }
+        public string CompanyType { get; set; }
+
         public AppUser AppUser { get; set; }
+
     }
 }

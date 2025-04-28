@@ -10,7 +10,9 @@ namespace TezGel.Application.Interfaces.Services
     {
         Task RegisterCustomerAsync(CustomerRegisterRequest dto);
         Task RegisterBusinessAsync(BusinessRegisterRequest dto);
-        Task<string> LoginAsync(string email, string password);
+        Task<(string AccessToken, string RefreshToken)> LoginAsync(string email, string password);
+        Task<(string AccessToken, string RefreshToken)> RefreshTokenAsync(string refreshToken);
+
 
     }
 

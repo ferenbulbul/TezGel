@@ -1,12 +1,18 @@
+
+using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using TezGel.API.Middlewares;
 using TezGel.Application.Interfaces.Repositories;
 using TezGel.Application.Interfaces.Services;
 using TezGel.Application.Services;
+using TezGel.Domain.Common;
 using TezGel.Domain.Entities;
+using TezGel.Infrastructure.Services;
 using TezGel.Persistence.Context;
 using TezGel.Persistence.Repositories;
+using TokenOptions = TezGel.Domain.Common.TokenOptions;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,10 +41,38 @@ builder.Services.AddIdentity<AppUser, IdentityRole<Guid>>(options =>
 }).AddEntityFrameworkStores<TezGelDbContext>()
 .AddDefaultTokenProviders();
 
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = "JwtBearer";
+    options.DefaultChallengeScheme = "JwtBearer";
+}).AddJwtBearer(options =>
+{
+    var tokenOptions = builder.Configuration.GetSection("TokenOptions").Get<TokenOptions>();
+    
+
+
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = tokenOptions.Issuer,
+        ValidAudience = tokenOptions.Audience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenOptions.SecurityKey)),
+        ClockSkew = TimeSpan.Zero
+    };
+});
+builder.Services.Configure<TokenOptions>(builder.Configuration.GetSection("TokenOptions"));
+builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
+
+builder.Services.AddScoped<IMailService, MailService>();
+
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<ICustomerUserRepository, CustomerUserRepository>();
 builder.Services.AddScoped<IBusinessUserRepository, BusinessUserRepository>();
 builder.Services.AddScoped<IAuthService, AuthManager>();
+builder.Services.AddScoped<ITokenService, TokenService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -56,6 +90,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("AllowAll");
 app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();

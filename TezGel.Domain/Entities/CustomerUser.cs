@@ -7,7 +7,7 @@ using TezGel.Domain.Common;
 namespace TezGel.Domain.Entities
 {
 
-    public class CustomerUser:BaseEntity
+    public class CustomerUser : BaseEntity
     {
         public Guid Id { get; set; }  // PK ve FK (AppUser.Id)
         public string Address { get; set; }

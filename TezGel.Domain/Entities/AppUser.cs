@@ -11,7 +11,13 @@ namespace TezGel.Domain.Entities
     public class AppUser : IdentityUser<Guid>
     {
         public UserType UserType { get; set; }
+        public string? RefreshToken { get; set; }
+        public double Longitute { get; set; }
+        public double Latitude { get; set; }
+        public DateTime? RefreshTokenExpireDate { get; set; }
         public CustomerUser? CustomerUser { get; set; }
         public BusinessUser? BusinessUser { get; set; }
+
+
     }
 }

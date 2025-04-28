@@ -11,6 +11,6 @@ namespace TezGel.Application.DTOs.Auth
         public string Password { get; set; }
         public string UserName { get; set; }
         public string CompanyName { get; set; }
-        public string TaxNumber { get; set; }
+        public string CompanyType { get; set; }
     }
 }

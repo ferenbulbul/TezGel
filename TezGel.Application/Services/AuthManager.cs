@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using TezGel.Application.DTOs.Auth;
 using TezGel.Application.Interfaces.Repositories;
@@ -16,6 +17,7 @@ namespace TezGel.Application.Services
     public class AuthManager : IAuthService
     {
         private readonly UserManager<AppUser> _userManager;
+        private readonly ITokenService _tokenService;
         private readonly ICustomerUserRepository _customerUserRepository;
         private readonly IBusinessUserRepository _businessUserRepository;
         private readonly IConfiguration _configuration;
@@ -24,12 +26,13 @@ namespace TezGel.Application.Services
             UserManager<AppUser> userManager,
             ICustomerUserRepository customerUserRepository,
             IBusinessUserRepository businessUserRepository,
-            IConfiguration configuration)
+            IConfiguration configuration, ITokenService tokenService)
         {
             _userManager = userManager;
             _customerUserRepository = customerUserRepository;
             _businessUserRepository = businessUserRepository;
             _configuration = configuration;
+            _tokenService = tokenService;
         }
 
         public async Task RegisterCustomerAsync(CustomerRegisterRequest dto)
@@ -71,45 +74,52 @@ namespace TezGel.Application.Services
 
             if (!result.Succeeded)
             {
-                var errorMessages = new List<string>();
-
-                foreach (var error in result.Errors)
-                {
-                    switch (error.Code)
-                    {
-                        case "DuplicateEmail":
-                            errorMessages.Add("Bu email adresi zaten kayıtlı.");
-                            break;
-                        case "DuplicateUserName":
-                            errorMessages.Add("Bu kullanıcı adı zaten kayıtlı.");
-                            break;
-                        case "PasswordTooShort":
-                            errorMessages.Add("Şifre çok kısa, en az 6 karakter olmalı.");
-                            break;
-                        default:
-                            errorMessages.Add("Beklenmeyen bir hata oluştu.");
-                            break;
-                    }
-                }
-
-                throw new BusinessException(string.Join(" | ", errorMessages));
+                throw new Exception(string.Join(", ", result.Errors.Select(x => x.Description)));
             }
 
             var business = new BusinessUser
             {
                 Id = user.Id,
                 CompanyName = dto.CompanyName,
-                TaxNumber = dto.TaxNumber
+                CompanyType = dto.CompanyType
             };
 
             await _businessUserRepository.AddAsync(business);
         }
 
-        public async Task<string> LoginAsync(string email, string password)
+        public async Task<(string AccessToken, string RefreshToken)> LoginAsync(string email, string password)
         {
-            // Şu an token işleri yapmıyoruz, placeholder:
-            throw new NotImplementedException();
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null || !await _userManager.CheckPasswordAsync(user, password))
+                throw new Exception("Geçersiz e mail adresi  veya şifre hatalı.");
+
+            var (accessToken, refreshToken) = await _tokenService.CreateTokenAsync(user);
+
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpireDate = DateTime.UtcNow.AddDays(7);
+            await _userManager.UpdateAsync(user);
+
+            return (accessToken, refreshToken);
         }
+
+        public async Task<(string AccessToken, string RefreshToken)> RefreshTokenAsync(string refreshToken)
+        {
+            var user = await _userManager.Users.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
+
+            if (user == null || user.RefreshTokenExpireDate <= DateTime.UtcNow)
+            {
+                throw new Exception("Invalid or expired refresh token.");
+            }
+
+            var (newAccessToken, newRefreshToken) = await _tokenService.CreateTokenAsync(user);
+
+            user.RefreshToken = newRefreshToken;
+            user.RefreshTokenExpireDate = DateTime.UtcNow.AddDays(7);
+            await _userManager.UpdateAsync(user);
+
+            return (newAccessToken, newRefreshToken);
+        }
+
     }
 
 }

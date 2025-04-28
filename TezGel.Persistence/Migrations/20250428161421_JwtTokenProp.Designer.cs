@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TezGel.Persistence.Context;
@@ -11,9 +12,11 @@ using TezGel.Persistence.Context;
 namespace TezGel.Persistence.Migrations
 {
     [DbContext(typeof(TezGelDbContext))]
-    partial class TezGelDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250428161421_JwtTokenProp")]
+    partial class JwtTokenProp
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

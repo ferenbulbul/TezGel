@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using TezGel.Application.DTOs.Auth;
+using TezGel.Application.Expection;
+using TezGel.Application.Expections;
 using TezGel.Application.Interfaces.Repositories;
 using TezGel.Application.Interfaces.Services;
 using TezGel.Domain.Entities;
@@ -39,6 +41,10 @@ namespace TezGel.Application.Services
 
         public async Task RegisterCustomerAsync(CustomerRegisterRequest dto)
         {
+            var existingUser = await _userManager.FindByEmailAsync(dto.Email);
+            if (existingUser != null)
+                throw new ValidationException("Bu e-posta adresi zaten kullanımda.");
+
             var user = new AppUser
             {
                 UserName = dto.UserName,
@@ -50,7 +56,8 @@ namespace TezGel.Application.Services
 
             if (!result.Succeeded)
             {
-                throw new Exception(string.Join(", ", result.Errors.Select(x => x.Description)));
+                var errorDescriptions = result.Errors.Select(e => e.Description).ToList();
+                throw new ValidationException(string.Join(", ", errorDescriptions));
             }
 
             var customer = new CustomerUser
@@ -62,9 +69,12 @@ namespace TezGel.Application.Services
 
             await _customerUserRepository.AddAsync(customer);
         }
-
         public async Task RegisterBusinessAsync(BusinessRegisterRequest dto)
         {
+            var existingUser = await _userManager.FindByEmailAsync(dto.Email);
+            if (existingUser != null)
+                throw new ValidationException("Bu e-posta adresi zaten kullanımda.");
+
             var user = new AppUser
             {
                 UserName = dto.UserName,
@@ -76,7 +86,8 @@ namespace TezGel.Application.Services
 
             if (!result.Succeeded)
             {
-                throw new Exception(string.Join(", ", result.Errors.Select(x => x.Description)));
+                var errors = string.Join(", ", result.Errors.Select(x => x.Description));
+                throw new ValidationException(errors);
             }
 
             var business = new BusinessUser
@@ -85,18 +96,18 @@ namespace TezGel.Application.Services
                 CompanyName = dto.CompanyName,
                 CompanyType = dto.CompanyType
             };
-            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-
-
 
             await _businessUserRepository.AddAsync(business);
         }
-
         public async Task<(string AccessToken, string RefreshToken, bool EmailConfirmed)> LoginAsync(string email, string password)
         {
             var user = await _userManager.FindByEmailAsync(email);
-            if (user == null || !await _userManager.CheckPasswordAsync(user, password))
-                throw new Exception("Geçersiz e mail adresi  veya şifre hatalı.");
+            if (user == null)
+                throw new NotFoundException("Kullanıcı bulunamadı.");
+
+            var passwordValid = await _userManager.CheckPasswordAsync(user, password);
+            if (!passwordValid)
+                throw new ValidationException("Şifre yanlış.");
 
 
             var (accessToken, refreshToken) = await _tokenService.CreateTokenAsync(user);
@@ -107,7 +118,6 @@ namespace TezGel.Application.Services
 
             return (accessToken, refreshToken, user.EmailConfirmed);
         }
-
         public async Task<(string AccessToken, string RefreshToken)> RefreshTokenAsync(string refreshToken)
         {
             var user = await _userManager.Users.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
@@ -125,30 +135,28 @@ namespace TezGel.Application.Services
 
             return (newAccessToken, newRefreshToken);
         }
-
         public async Task VerifyEmailCodeAsync(string email, string code)
         {
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
-                throw new Exception("Kullanıcı bulunamadı.");
+                throw new NotFoundException("Kullanıcı bulunamadı.");
 
             if (user.EmailVerificationCode != code)
-                throw new Exception("Kod yanlış.");
+                throw new NotFoundException("Kod yanlış.");
 
             if (user.EmailVerificationExpireTime == null || user.EmailVerificationExpireTime < DateTime.UtcNow)
-                throw new Exception("Kodun süresi dolmuş.");
+                throw new NotFoundException("Kodun süresi dolmuş.");
 
             user.EmailConfirmed = true;
             user.EmailVerificationCode = null;
             user.EmailVerificationExpireTime = null;
             await _userManager.UpdateAsync(user);
         }
-
         public async Task CreateEmailCodeAsync(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
-                throw new Exception("Kullanıcı bulunamadı.");
+                throw new NotFoundException("Kullanıcı bulunamadı.");
 
 
 

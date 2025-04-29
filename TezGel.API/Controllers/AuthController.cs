@@ -42,35 +42,27 @@ namespace TezGel.API.Controllers
             var (accessToken, refreshToken, emailConfirmed) = await _authService.LoginAsync(request.Username, request.Password);
 
 
-            var response = new
+            var response = ApiResponse<object>.SuccessResponse(new
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
                 EmailConfirmed = emailConfirmed
-            };
+            }, "Giriş başarılı.", 200);
 
-            return Ok(ApiResponse<object>.SuccessResponse(response, "Login successful."));
+            return Ok(response);
         }
 
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
         {
-            try
-            {
                 var (accessToken, refreshToken) = await _authService.RefreshTokenAsync(request.RefreshToken);
-
                 var response = new
                 {
                     AccessToken = accessToken,
                     RefreshToken = refreshToken
                 };
-
                 return Ok(ApiResponse<object>.SuccessResponse(response, "Token refreshed successfully."));
-            }
-            catch (Exception ex)
-            {
-                return Unauthorized(ApiResponse<string>.FailResponse(ex.Message));
-            }
+            
         }
 
         [HttpPost("send-test-mail")]
@@ -97,15 +89,9 @@ namespace TezGel.API.Controllers
         [HttpPost("create-email-code")]
         public async Task<IActionResult> CreateEmailCode([FromQuery] string email)
         {
-            try
-            {
-                await _authService.CreateEmailCodeAsync(email);
-                return Ok(ApiResponse<string>.SuccessResponse(null, "E-posta kodu gönderildi."));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ApiResponse<string>.FailResponse(ex.Message));
-            }
+
+            await _authService.CreateEmailCodeAsync(email);
+            return Ok(ApiResponse<string>.SuccessResponse(null, "E-posta kodu gönderildi."));
         }
     }
 }

@@ -2,50 +2,56 @@ using Microsoft.AspNetCore.Http;
 using System.Net;
 using System.Text.Json;
 using TezGel.Application.DTOs.Auth.Comman;
+using TezGel.Application.Expection;
 
 
 namespace TezGel.API.Middlewares
 {
-    public class GlobalExceptionMiddleware
+
+    public class ErrorHandlingMiddleware
     {
         private readonly RequestDelegate _next;
+        private readonly ILogger<ErrorHandlingMiddleware> _logger;
 
-        public GlobalExceptionMiddleware(RequestDelegate next)
+        public ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandlingMiddleware> logger)
         {
             _next = next;
+            _logger = logger;
         }
 
-        public async Task InvokeAsync(HttpContext context)
+        public async Task Invoke(HttpContext context)
         {
             try
             {
-                await _next(context); // normal istek akışı
+                await _next(context);
             }
-            catch (Exception ex)
+            catch (BaseException ex) // Bizim özel exception'larımız
             {
-                await HandleExceptionAsync(context, ex); // hata varsa yakala
+                context.Response.ContentType = "application/json";
+                context.Response.StatusCode = ex.StatusCode;
+
+                var response = ApiResponse<string>.FailResponse(ex.Message, ex.StatusCode);
+                await context.Response.WriteAsync(JsonSerializer.Serialize(response));
             }
-        }
+            catch (FluentValidation.ValidationException validationException) // FluentValidation Exception'u
+            {
+                context.Response.ContentType = "application/json";
+                context.Response.StatusCode = 400;
 
-        private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
-        {
-            context.Response.ContentType = "application/json";
+                var validationErrors = validationException.Errors.Select(e => e.ErrorMessage).ToList();
+                var response = ApiResponse<string>.FailResponse("Doğrulama hataları oluştu.", 400, validationErrors);
+                await context.Response.WriteAsync(JsonSerializer.Serialize(response));
+            }
+            catch (Exception ex) // Beklenmeyen tüm diğer hatalar
+            {
+                _logger.LogError(ex, "Unhandled exception occured");
 
-            var responseModel = ApiResponse<string>.FailResponse(exception.Message);
+                context.Response.ContentType = "application/json";
+                context.Response.StatusCode = 500;
 
-            HttpStatusCode statusCode = HttpStatusCode.InternalServerError;
-
-            // Burada exception türüne göre statusCode değiştirebilirsin
-            if (exception is ArgumentException) 
-                statusCode = HttpStatusCode.BadRequest;
-            if (exception is InvalidOperationException)
-                statusCode = HttpStatusCode.BadRequest;
-            // FluentValidation veya kendi özel hata türlerin olursa buraya ekleriz.
-
-            context.Response.StatusCode = (int)statusCode;
-
-            var responseJson = JsonSerializer.Serialize(responseModel);
-            await context.Response.WriteAsync(responseJson);
+                var response = ApiResponse<string>.ExceptionResponse("Sunucu hatası oluştu.");
+                await context.Response.WriteAsync(JsonSerializer.Serialize(response));
+            }
         }
     }
 }

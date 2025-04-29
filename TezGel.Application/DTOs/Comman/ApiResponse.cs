@@ -2,32 +2,51 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TezGel.Application.DTOs.Comman;
 
 namespace TezGel.Application.DTOs.Auth.Comman
 {
-    public class ApiResponse<T>
+    public class ApiResponse<T> : BaseResponse
     {
-        public bool Success { get; set; }
-        public string Message { get; set; }
-        public T Data { get; set; }
+        public string? Message { get; set; }
+        public T? Data { get; set; }
 
-        public static ApiResponse<T> SuccessResponse(T data, string message = "")
+        public static ApiResponse<T> SuccessResponse(T? data, string message, int statusCode = 200)
         {
             return new ApiResponse<T>
             {
-                Success = true,
+                Data = data,
                 Message = message,
-                Data = data
+                StatusCode = statusCode,
+                IsSuccess = true,
+                HasExceptionError = false,
+                ValidationErrors = null
             };
         }
 
-        public static ApiResponse<T> FailResponse(string message)
+        public static ApiResponse<T> FailResponse(string message, int statusCode = 400, List<string>? validationErrors = null)
         {
             return new ApiResponse<T>
             {
-                Success = false,
+                Data = default,
                 Message = message,
-                Data = default
+                StatusCode = statusCode,
+                IsSuccess = false,
+                HasExceptionError = false,
+                ValidationErrors = validationErrors
+            };
+        }
+
+        public static ApiResponse<T> ExceptionResponse(string message)
+        {
+            return new ApiResponse<T>
+            {
+                Data = default,
+                Message = message,
+                StatusCode = 500,
+                IsSuccess = false,
+                HasExceptionError = true,
+                ValidationErrors = null
             };
         }
     }

@@ -3,6 +3,7 @@ using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using StackExchange.Redis;
 using TezGel.API.Middlewares;
 using TezGel.Application.Interfaces.Repositories;
 using TezGel.Application.Interfaces.Services;
@@ -66,13 +67,18 @@ builder.Services.AddAuthentication(options =>
 builder.Services.Configure<TokenOptions>(builder.Configuration.GetSection("TokenOptions"));
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 
-builder.Services.AddScoped<IMailService, MailService>();
+builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect("localhost:6379"));
 
+builder.Services.AddScoped<IMailService, MailService>();
+builder.Services.AddScoped<IRedisService, RedisService>();
+ 
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<ICustomerUserRepository, CustomerUserRepository>();
 builder.Services.AddScoped<IBusinessUserRepository, BusinessUserRepository>();
 builder.Services.AddScoped<IAuthService, AuthManager>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IRedisEmailVerificationService, RedisEmailVerificationService>();
+
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

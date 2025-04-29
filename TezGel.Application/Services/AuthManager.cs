@@ -23,13 +23,17 @@ namespace TezGel.Application.Services
         private readonly ICustomerUserRepository _customerUserRepository;
         private readonly IBusinessUserRepository _businessUserRepository;
         IMailService _mailService;
+        IRedisEmailVerificationService _redisEmailVerificationService;
         private readonly IConfiguration _configuration;
 
         public AuthManager(
             UserManager<AppUser> userManager,
             ICustomerUserRepository customerUserRepository,
             IBusinessUserRepository businessUserRepository,
-            IConfiguration configuration, ITokenService tokenService, IMailService mailService)
+            IConfiguration configuration,
+            ITokenService tokenService,
+            IMailService mailService,
+            IRedisEmailVerificationService redisEmailVerificationService)
         {
             _userManager = userManager;
             _customerUserRepository = customerUserRepository;
@@ -37,6 +41,7 @@ namespace TezGel.Application.Services
             _configuration = configuration;
             _tokenService = tokenService;
             _mailService = mailService;
+            _redisEmailVerificationService = redisEmailVerificationService;
         }
 
         public async Task RegisterCustomerAsync(CustomerRegisterRequest dto)
@@ -141,16 +146,17 @@ namespace TezGel.Application.Services
             if (user == null)
                 throw new NotFoundException("Kullanıcı bulunamadı.");
 
-            if (user.EmailVerificationCode != code)
-                throw new NotFoundException("Kod yanlış.");
 
-            if (user.EmailVerificationExpireTime == null || user.EmailVerificationExpireTime < DateTime.UtcNow)
-                throw new NotFoundException("Kodun süresi dolmuş.");
-
-            user.EmailConfirmed = true;
-            user.EmailVerificationCode = null;
-            user.EmailVerificationExpireTime = null;
-            await _userManager.UpdateAsync(user);
+            var isValid = await _redisEmailVerificationService.ValidateEmailVerificationCodeAsync(user.Id.ToString(), code);
+            if (isValid)
+            {
+                user.EmailConfirmed = true;
+                await _userManager.UpdateAsync(user);
+            }
+            else
+            {
+                throw new ValidationException("Geçersiz doğrulama kodu.");
+            }
         }
         public async Task CreateEmailCodeAsync(string email)
         {
@@ -161,9 +167,8 @@ namespace TezGel.Application.Services
 
 
             var verificationCode = new Random().Next(100000, 999999).ToString();
-            user.EmailVerificationCode = verificationCode;
-            user.EmailVerificationExpireTime = DateTime.UtcNow.AddMinutes(5);
-            await _userManager.UpdateAsync(user);
+
+            await _redisEmailVerificationService.SetEmailVerificationCodeAsync(user.Id.ToString(), verificationCode);
 
             await _mailService.SendEmailAsync(email, "Email Doğrulama Kodu", $"Doğrulama kodunuz: {verificationCode}");
         }

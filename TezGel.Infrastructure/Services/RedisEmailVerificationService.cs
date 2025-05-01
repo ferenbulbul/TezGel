@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TezGel.Application.Expections;
 using TezGel.Application.Interfaces.Services;
 
 namespace TezGel.Infrastructure.Services
@@ -27,9 +28,6 @@ namespace TezGel.Infrastructure.Services
         {
             var key = $"{EmailVerificationPrefix}{userId}";
             var storedCode = await _redisService.GetAsync(key);
-
-            if (string.IsNullOrEmpty(storedCode))
-                return false; // Kayıt bulunamadı veya expire oldu
 
             return storedCode == code; // Kod doğru mu kontrol
         }

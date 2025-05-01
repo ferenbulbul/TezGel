@@ -49,7 +49,7 @@ namespace TezGel.API.Middlewares
                 context.Response.ContentType = "application/json";
                 context.Response.StatusCode = 500;
 
-                var response = ApiResponse<string>.ExceptionResponse("Sunucu hatası oluştu.");
+                var response = ApiResponse<string>.ExceptionResponse($"Sunucu hatası oluştu.{ex.Message}");
                 await context.Response.WriteAsync(JsonSerializer.Serialize(response));
             }
         }

@@ -19,6 +19,20 @@ services:
       - "6379:6379"
     volumes:
       - redis-data:/data
+  
+  tezgel-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5001:80"
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=tezgeldb;Username=myuser;Password=mypass
+      - REDIS_CONNECTION_STRING=redis://redis:6379
 
 volumes:
   postgres-data:

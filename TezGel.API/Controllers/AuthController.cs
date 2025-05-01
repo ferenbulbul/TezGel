@@ -1,7 +1,12 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TezGel.Application.DTOs.Auth;
 using TezGel.Application.DTOs.Auth.Comman;
 using TezGel.Application.Interfaces.Services;
+using TezGel.Domain.Entities;
+using TezGel.Domain.Enums;
 
 namespace TezGel.API.Controllers
 {
@@ -52,17 +57,20 @@ namespace TezGel.API.Controllers
             return Ok(response);
         }
 
+
+        //[Authorize(AuthenticationSchemes = "Bearer")]
+        [Authorize(AuthenticationSchemes = "Bearer", Roles = "customer")]
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
         {
-                var (accessToken, refreshToken) = await _authService.RefreshTokenAsync(request.RefreshToken);
-                var response = new
-                {
-                    AccessToken = accessToken,
-                    RefreshToken = refreshToken
-                };
-                return Ok(ApiResponse<object>.SuccessResponse(response, "Token refreshed successfully."));
-            
+            var (accessToken, refreshToken) = await _authService.RefreshTokenAsync(request.RefreshToken);
+            var response = new
+            {
+                AccessToken = accessToken,
+                RefreshToken = refreshToken
+            };
+            return Ok(ApiResponse<object>.SuccessResponse(response, "Token refreshed successfully."));
+
         }
 
         [HttpPost("send-test-mail")]
@@ -71,27 +79,30 @@ namespace TezGel.API.Controllers
             await _mailService.SendEmailAsync("ferenbulbul@gmail.com", "Test Başlık", "Bu bir test epostasıdır.");
             return Ok("Test mail gönderildi.");
         }
-
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost("verify-email-code")]
+
         public async Task<IActionResult> VerifyEmailCode([FromBody] VerifyEmailCodeRequest request)
         {
-            try
-            {
-                await _authService.VerifyEmailCodeAsync(request.Email, request.Code);
-                return Ok(ApiResponse<string>.SuccessResponse(null, "E-posta doğrulandı."));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ApiResponse<string>.FailResponse(ex.Message));
-            }
+            var email=User.FindFirst(ClaimTypes.Email)?.Value;
+            await _authService.VerifyEmailCodeAsync(email, request.Code);
+            return Ok(ApiResponse<string>.SuccessResponse(null, "E-posta doğrulandı."));
+
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost("create-email-code")]
-        public async Task<IActionResult> CreateEmailCode([FromQuery] string email)
+        public async Task<IActionResult> CreateEmailCode()
         {
-
+            var email=User.FindFirst(ClaimTypes.Email)?.Value;
             await _authService.CreateEmailCodeAsync(email);
             return Ok(ApiResponse<string>.SuccessResponse(null, "E-posta kodu gönderildi."));
         }
     }
 }
+
+
+// var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? throw new Exception("Kullanıcı ID bulunamadı"));
+// var userName = User.FindFirst(ClaimTypes.Name)?.Value;
+// var role = User.FindFirst(ClaimTypes.Role)?.Value;
+// var emailClaim = User.FindFirst(ClaimTypes.Email)?.Value;

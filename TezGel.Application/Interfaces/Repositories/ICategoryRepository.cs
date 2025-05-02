@@ -6,8 +6,8 @@ using TezGel.Domain.Entities;
 
 namespace TezGel.Application.Interfaces.Repositories
 {
-    public interface IProductRepository : IGenericRepository<Product>
+    public interface ICategoryRepository:IGenericRepository<Category>
     {
-        Task<List<Product>> GetAllWithIncludesAsync();
+        
     }
 }

@@ -172,11 +172,23 @@ namespace TezGel.Persistence.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("FirstName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("LastName")
+                        .HasColumnType("text");
+
+                    b.Property<double>("Latitude")
+                        .HasColumnType("double precision");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<double>("Longitute")
+                        .HasColumnType("double precision");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
@@ -235,13 +247,41 @@ namespace TezGel.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("CompanyType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("TaxNumber")
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("BusinessUsers", (string)null);
+                });
+
+            modelBuilder.Entity("TezGel.Domain.Entities.Category", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -250,7 +290,33 @@ namespace TezGel.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("BusinessUsers", (string)null);
+                    b.ToTable("Categories", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("11111111-1111-1111-1111-111111111111"),
+                            CreatedDate = new DateTime(2025, 5, 2, 22, 13, 34, 422, DateTimeKind.Utc).AddTicks(2190),
+                            Description = "Tatlı ve şekerli ürünler",
+                            IsDeleted = false,
+                            Name = "Tatlı"
+                        },
+                        new
+                        {
+                            Id = new Guid("22222222-2222-2222-2222-222222222222"),
+                            CreatedDate = new DateTime(2025, 5, 2, 22, 13, 34, 422, DateTimeKind.Utc).AddTicks(2200),
+                            Description = "Poğaça, börek, çörek",
+                            IsDeleted = false,
+                            Name = "Hamur İşi"
+                        },
+                        new
+                        {
+                            Id = new Guid("33333333-3333-3333-3333-333333333333"),
+                            CreatedDate = new DateTime(2025, 5, 2, 22, 13, 34, 422, DateTimeKind.Utc).AddTicks(2200),
+                            Description = "Soğuk ve sıcak içecekler",
+                            IsDeleted = false,
+                            Name = "İçecek"
+                        });
                 });
 
             modelBuilder.Entity("TezGel.Domain.Entities.CustomerUser", b =>
@@ -277,6 +343,66 @@ namespace TezGel.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("CustomerUsers", (string)null);
+                });
+
+            modelBuilder.Entity("TezGel.Domain.Entities.Product", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("BusinessUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("DiscountedPrice")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime>("ExpireAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ImagePath")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<double>("Latitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("OriginalPrice")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BusinessUserId");
+
+                    b.HasIndex("CategoryId");
+
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -352,11 +478,35 @@ namespace TezGel.Persistence.Migrations
                     b.Navigation("AppUser");
                 });
 
+            modelBuilder.Entity("TezGel.Domain.Entities.Product", b =>
+                {
+                    b.HasOne("TezGel.Domain.Entities.BusinessUser", "BusinessUser")
+                        .WithMany()
+                        .HasForeignKey("BusinessUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TezGel.Domain.Entities.Category", "Category")
+                        .WithMany("Products")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BusinessUser");
+
+                    b.Navigation("Category");
+                });
+
             modelBuilder.Entity("TezGel.Domain.Entities.AppUser", b =>
                 {
                     b.Navigation("BusinessUser");
 
                     b.Navigation("CustomerUser");
+                });
+
+            modelBuilder.Entity("TezGel.Domain.Entities.Category", b =>
+                {
+                    b.Navigation("Products");
                 });
 #pragma warning restore 612, 618
         }

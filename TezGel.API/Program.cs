@@ -68,10 +68,10 @@ builder.Services.AddAuthentication(options =>
 });
 
 
-builder.WebHost.ConfigureKestrel(serverOptions =>
-{
-    serverOptions.ListenAnyIP(80);
-});
+// builder.WebHost.ConfigureKestrel(serverOptions =>
+// {
+//     serverOptions.ListenAnyIP(80);
+// });
 
 builder.Services.Configure<TokenOptions>(builder.Configuration.GetSection("TokenOptions"));
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
@@ -146,7 +146,7 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IRedisEmailVerificationService, RedisEmailVerificationService>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductManager>();
-builder.Services.AddScoped<IFileService, FileService>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 
 
 
@@ -191,6 +191,14 @@ builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
 
+if (app.Environment.IsProduction()) // veya: if (Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true")
+{
+    builder.WebHost.ConfigureKestrel(serverOptions =>
+    {
+        serverOptions.ListenAnyIP(80); // sadece Docker'da
+    });
+}
+
 app.UseMiddleware<ErrorHandlingMiddleware>();
 if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {
@@ -220,7 +228,6 @@ using (var scope = app.Services.CreateScope())
         }
     }
 }
-app.UseStaticFiles();
 app.UseCors("AllowAll");
 app.UseHttpsRedirection();
 app.UseAuthentication();

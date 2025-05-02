@@ -2,10 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using TezGel.Application.DTOs.Product;
+using TezGel.Application.Expection;
+using TezGel.Application.Expections;
 using TezGel.Application.Interfaces;
 using TezGel.Application.Interfaces.Repositories;
-using TezGel.Application.Interfaces.Services;
 using TezGel.Domain.Entities;
 
 namespace TezGel.Application.Services
@@ -14,35 +16,76 @@ namespace TezGel.Application.Services
     public class ProductManager : IProductService
     {
         private readonly IProductRepository _productRepository;
-        private readonly IFileService _fileService;
+        private readonly ICategoryRepository _categoryRepository;
 
-        public ProductManager(IProductRepository productRepository, IFileService fileService)
+        public ProductManager(IProductRepository productRepository,ICategoryRepository categoryRepository)
         {
+            _categoryRepository = categoryRepository;
             _productRepository = productRepository;
-            _fileService = fileService;
         }
 
-        public async Task CreateProductAsync(ProductCreateDto dto)
+        public async Task CreateProductAsync(ProductCreateRequest request)
         {
-            var imagePath = await _fileService.SaveImageAsync(dto.ImageFile);
+            if (string.IsNullOrWhiteSpace(request.Name))
+                throw new BusinessException("Ürün adı boş olamaz.");
 
+            if (request.OriginalPrice <= 0 || request.DiscountedPrice <= 0)
+                throw new BusinessException("Fiyatlar 0'dan büyük olmalıdır.");
+
+            if (request.DiscountedPrice > request.OriginalPrice)
+                throw new BusinessException("İndirimli fiyat, orijinal fiyattan yüksek olamaz.");
+
+            if (request.ExpireAt <= DateTime.UtcNow)
+                throw new BusinessException("Geçerlilik tarihi geçmiş olamaz.");
+
+            var category = await _categoryRepository.GetByIdAsync(request.CategoryId);
+            if (category == null)
+                throw new NotFoundException("Kategori bulunamadı.");
             var product = new Product
             {
-                Name = dto.Name,
-                Description = dto.Description,
-                OriginalPrice = dto.OriginalPrice,
-                DiscountedPrice = dto.DiscountedPrice,
-                CategoryId = dto.CategoryId,
-                Latitude = dto.Latitude,
-                Longitude = dto.Longitude,
-                ImagePath = imagePath,
-                ExpireAt = dto.ExpireAt,
-                BusinessUserId = dto.BusinessUserId,
+                Name = request.Name,
+                Description = request.Description,
+                OriginalPrice = request.OriginalPrice,
+                DiscountedPrice = request.DiscountedPrice,
+                CategoryId = request.CategoryId,
+                Latitude = request.Latitude,
+                Longitude = request.Longitude,
+                ImagePath = request.ImagePath,
+                ExpireAt = request.ExpireAt,
+                BusinessUserId = request.BusinessUserId,
                 CreatedDate = DateTime.UtcNow,
                 IsActive = true
             };
-
-            await _productRepository.AddAsync(product);
+            try
+            {
+                await _productRepository.AddAsync(product);
+            }
+            catch (DbUpdateException ex)
+            {
+                throw new BusinessException("Ürün kaydedilemedi. Lütfen geçerli veriler gönderin.",ex);
+            }
         }
+
+        public async Task<List<ProductListResponse>> GetAllAsync()
+        {
+            var products = await _productRepository.GetAllWithIncludesAsync();
+
+            if (products == null || !products.Any())
+                throw new NotFoundException("Hiç ürün bulunamadı.");
+
+            return products.Select(p => new ProductListResponse
+            {
+                Name = p.Name,
+                Description = p.Description,
+                OriginalPrice = p.OriginalPrice,
+                DiscountedPrice = p.DiscountedPrice,
+                ImagePath = p.ImagePath,
+                ExpireAt = p.ExpireAt,
+                Latitude = p.Latitude,
+                Longitude = p.Longitude,
+                CategoryName = p.Category?.Name ?? "-"
+            }).ToList();
+        }
+
     }
 }

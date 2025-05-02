@@ -9,7 +9,8 @@ namespace TezGel.Application.Expection
     {
         public int StatusCode { get; }
 
-        protected BaseException(string message, int statusCode) : base(message)
+        protected BaseException(string message, int statusCode, Exception? innerException = null)
+            : base(message, innerException)
         {
             StatusCode = statusCode;
         }

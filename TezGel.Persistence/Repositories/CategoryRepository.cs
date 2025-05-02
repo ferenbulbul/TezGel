@@ -8,12 +8,11 @@ using TezGel.Persistence.Context;
 
 namespace TezGel.Persistence.Repositories
 {
-    public class CustomerUserRepository : GenericRepository<CustomerUser>, ICustomerUserRepository
+    public class CategoryRepository:GenericRepository<Category>, ICategoryRepository
     {
-        public CustomerUserRepository(TezGelDbContext context) : base(context)
+        public CategoryRepository(TezGelDbContext context) : base(context)
         {
         }
-
-        // CustomerUser'a özel metodlar buraya gelebilir.
+        
     }
 }

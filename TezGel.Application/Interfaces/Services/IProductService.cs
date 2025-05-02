@@ -8,6 +8,7 @@ namespace TezGel.Application.Interfaces
 {
     public interface IProductService
     {
-        Task CreateProductAsync(ProductCreateDto dto);
+        Task CreateProductAsync(ProductCreateRequest request);
+        Task<List<ProductListResponse>> GetAllAsync();
     }
 }

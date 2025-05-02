@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
 using TezGel.API.Middlewares;
+using TezGel.Application.Interfaces;
 using TezGel.Application.Interfaces.Repositories;
 using TezGel.Application.Interfaces.Services;
 using TezGel.Application.Services;
@@ -143,6 +144,11 @@ builder.Services.AddScoped<IBusinessUserRepository, BusinessUserRepository>();
 builder.Services.AddScoped<IAuthService, AuthManager>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IRedisEmailVerificationService, RedisEmailVerificationService>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IProductService, ProductManager>();
+builder.Services.AddScoped<IFileService, FileService>();
+
+
 
 
 builder.Services.AddControllers();
@@ -214,7 +220,7 @@ using (var scope = app.Services.CreateScope())
         }
     }
 }
-
+app.UseStaticFiles();
 app.UseCors("AllowAll");
 app.UseHttpsRedirection();
 app.UseAuthentication();

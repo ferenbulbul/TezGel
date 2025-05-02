@@ -59,7 +59,7 @@ namespace TezGel.API.Controllers
 
 
         //[Authorize(AuthenticationSchemes = "Bearer")]
-        [Authorize(AuthenticationSchemes = "Bearer", Roles = "customer")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
         {

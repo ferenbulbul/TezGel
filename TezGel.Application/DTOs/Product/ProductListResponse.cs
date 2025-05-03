@@ -7,6 +7,7 @@ namespace TezGel.Application.DTOs.Product
 {
     public class ProductListResponse
     {
+        public Guid Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public decimal OriginalPrice { get; set; }
@@ -16,5 +17,6 @@ namespace TezGel.Application.DTOs.Product
         public double Latitude { get; set; }
         public double Longitude { get; set; }
         public string CategoryName { get; set; }
+         public bool IsReserved { get; set; }
     }
 }

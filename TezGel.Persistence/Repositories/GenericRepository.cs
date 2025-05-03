@@ -33,20 +33,20 @@ namespace TezGel.Persistence.Repositories
         public async Task AddAsync(T entity)
         {
             await _dbSet.AddAsync(entity);
-            await _context.SaveChangesAsync(); // MUTLAKA veritabanına kaydet
+            await _context.SaveChangesAsync(); 
         }
 
         public async Task UpdateAsync(T entity)
         {
             _dbSet.Update(entity);
-            await _context.SaveChangesAsync(); // Update sonrası hemen save
+            await _context.SaveChangesAsync(); 
         }
 
         public async Task DeleteAsync(T entity)
         {
-            entity.IsDeleted = true; // Soft delete yap
+            entity.IsDeleted = true; 
             _dbSet.Update(entity);
-            await _context.SaveChangesAsync(); // Save değişikliği
+            await _context.SaveChangesAsync(); 
         }
 
     }

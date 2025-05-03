@@ -12,6 +12,7 @@ using TezGel.Application.Interfaces.Services;
 using TezGel.Application.Services;
 using TezGel.Domain.Common;
 using TezGel.Domain.Entities;
+using TezGel.Infrastructure.HostedService;
 using TezGel.Infrastructure.Services;
 using TezGel.Persistence.Context;
 using TezGel.Persistence.Repositories;
@@ -135,6 +136,7 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Conn
 //     }
 // });
 
+builder.Services.AddHostedService<ExpiredReservationBackgroundService>();
 builder.Services.AddScoped<IMailService, MailService>();
 builder.Services.AddScoped<IRedisService, RedisService>();
 
@@ -147,6 +149,9 @@ builder.Services.AddScoped<IRedisEmailVerificationService, RedisEmailVerificatio
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductManager>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IActionRepository, ActionRepository>();
+builder.Services.AddScoped<ILockService, RedisLockService>();
+builder.Services.AddScoped<IReservationService, ReservationService>();
 
 
 

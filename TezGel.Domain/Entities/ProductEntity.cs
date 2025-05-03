@@ -25,6 +25,7 @@ namespace TezGel.Domain.Entities
         public Guid CategoryId { get; set; }
         public Category Category { get; set; }
 
+         public ICollection<ActionReservation> ActionReservations { get; set; }
         public bool IsActive { get; set; } = true;
     }
 

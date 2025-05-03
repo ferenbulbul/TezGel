@@ -15,14 +15,11 @@ namespace TezGel.Persistence.Repositories
         {
         }
 
-        public async Task<List<Product>> GetAvailableProductsNearLocationAsync(double lat, double lng, double maxDistanceInKm)
+        public async Task<List<Product>> GetAllWithIncludesAsync()
         {
-            // Basit mesafe filtresi (haversine yerine düz kare mesafe örneği)
             return await _context.Products
-                .Where(p => p.IsActive && !p.IsDeleted && p.ExpireAt > DateTime.UtcNow)
-                .Where(p =>
-                    Math.Abs(p.Latitude - lat) < 0.1 &&  // basit kare kutu
-                    Math.Abs(p.Longitude - lng) < 0.1)
+                .Include(p => p.Category)
+                .Where(p => !p.IsDeleted && p.IsActive && p.ExpireAt > DateTime.UtcNow)
                 .ToListAsync();
         }
     }

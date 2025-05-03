@@ -20,6 +20,7 @@ namespace TezGel.Persistence.Context
         public DbSet<BusinessUser> BusinessUsers { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Category> Categories { get; set; }
+        public DbSet<ActionReservation> ActionReservations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -46,6 +47,7 @@ namespace TezGel.Persistence.Context
                       .WithOne(u => u.BusinessUser)
                       .HasForeignKey<BusinessUser>(e => e.Id);
             });
+            
             builder.Entity<Product>(entity =>
             {
                 entity.ToTable("Products");
@@ -89,7 +91,36 @@ namespace TezGel.Persistence.Context
                 Description = "Soğuk ve sıcak içecekler",
                 CreatedDate = DateTime.UtcNow
             }
-);
+         );
+
+            builder.Entity<ActionReservation>(b =>
+            {
+                b.ToTable("ActionReservations");
+                b.HasKey(a => a.Id);
+
+                // 1) Product → Reservations ilişkisi
+                b.HasOne(a => a.Product)
+                 .WithMany(p => p.ActionReservations)
+                 .HasForeignKey(a => a.ProductId);
+
+                // 2) Reservation → CustomerUser (Many-to-One)
+                b.HasOne(a => a.CustomerUser)
+                 .WithMany(cu => cu.ActionReservations)
+                 .HasForeignKey(a => a.UserId)
+                 .OnDelete(DeleteBehavior.Restrict);
+
+                // 3) Diğer zorunluluklar
+                b.Property(a => a.ExpireAt).IsRequired();
+                b.Property(a => a.Status)
+                 .HasConversion<string>()
+                 .HasMaxLength(20);
+
+                // 4) Soft-delete / expired filtre
+                b.HasQueryFilter(a => !a.IsDeleted);
+            });
+
         }
+
     }
+
 }

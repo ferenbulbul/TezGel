@@ -29,7 +29,7 @@ namespace TezGel.API.Controllers
         }
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost("create")]
-        public async Task<IActionResult> Create([FromBody]  ProductCreateRequest request)
+        public async Task<IActionResult> Create([FromBody] ProductCreateRequest request)
         {
             var userId = GetUserIdFromToken();
             request.BusinessUserId = userId;
@@ -41,8 +41,17 @@ namespace TezGel.API.Controllers
         [HttpGet("all")]
         public async Task<IActionResult> GetAll()
         {
-            var products = await _productService.GetAllAsync();
+            var products = await _productService.GetAllProductsAsync();
             var response = ApiResponse<List<ProductListResponse>>.SuccessResponse(products, "Ürünler başarıyla getirildi.");
+            return Ok(response);
+        }
+
+         [HttpGet("available")]
+        public async Task<IActionResult> GetAvailable()
+        {
+            var products = await _productService.GetAvailableProductsAsync();
+            var response = ApiResponse<List<ProductListResponse>>
+                               .SuccessResponse(products, "Mevcut ürünler başarıyla getirildi.");
             return Ok(response);
         }
     }

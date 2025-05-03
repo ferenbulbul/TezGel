@@ -152,6 +152,44 @@ namespace TezGel.Persistence.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("TezGel.Domain.Entities.ActionReservation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ExpireAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ActionReservations", (string)null);
+                });
+
             modelBuilder.Entity("TezGel.Domain.Entities.AppUser", b =>
                 {
                     b.Property<Guid>("Id")
@@ -296,7 +334,7 @@ namespace TezGel.Persistence.Migrations
                         new
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
-                            CreatedDate = new DateTime(2025, 5, 2, 22, 13, 34, 422, DateTimeKind.Utc).AddTicks(2190),
+                            CreatedDate = new DateTime(2025, 5, 3, 14, 19, 55, 4, DateTimeKind.Utc).AddTicks(9850),
                             Description = "Tatlı ve şekerli ürünler",
                             IsDeleted = false,
                             Name = "Tatlı"
@@ -304,7 +342,7 @@ namespace TezGel.Persistence.Migrations
                         new
                         {
                             Id = new Guid("22222222-2222-2222-2222-222222222222"),
-                            CreatedDate = new DateTime(2025, 5, 2, 22, 13, 34, 422, DateTimeKind.Utc).AddTicks(2200),
+                            CreatedDate = new DateTime(2025, 5, 3, 14, 19, 55, 4, DateTimeKind.Utc).AddTicks(9860),
                             Description = "Poğaça, börek, çörek",
                             IsDeleted = false,
                             Name = "Hamur İşi"
@@ -312,7 +350,7 @@ namespace TezGel.Persistence.Migrations
                         new
                         {
                             Id = new Guid("33333333-3333-3333-3333-333333333333"),
-                            CreatedDate = new DateTime(2025, 5, 2, 22, 13, 34, 422, DateTimeKind.Utc).AddTicks(2200),
+                            CreatedDate = new DateTime(2025, 5, 3, 14, 19, 55, 4, DateTimeKind.Utc).AddTicks(9860),
                             Description = "Soğuk ve sıcak içecekler",
                             IsDeleted = false,
                             Name = "İçecek"
@@ -456,6 +494,25 @@ namespace TezGel.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("TezGel.Domain.Entities.ActionReservation", b =>
+                {
+                    b.HasOne("TezGel.Domain.Entities.Product", "Product")
+                        .WithMany("ActionReservations")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TezGel.Domain.Entities.CustomerUser", "CustomerUser")
+                        .WithMany("ActionReservations")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CustomerUser");
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("TezGel.Domain.Entities.BusinessUser", b =>
                 {
                     b.HasOne("TezGel.Domain.Entities.AppUser", "AppUser")
@@ -507,6 +564,16 @@ namespace TezGel.Persistence.Migrations
             modelBuilder.Entity("TezGel.Domain.Entities.Category", b =>
                 {
                     b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("TezGel.Domain.Entities.CustomerUser", b =>
+                {
+                    b.Navigation("ActionReservations");
+                });
+
+            modelBuilder.Entity("TezGel.Domain.Entities.Product", b =>
+                {
+                    b.Navigation("ActionReservations");
                 });
 #pragma warning restore 612, 618
         }

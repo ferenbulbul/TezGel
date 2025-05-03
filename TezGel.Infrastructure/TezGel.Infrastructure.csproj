@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TezGel.Application\TezGel.Application.csproj" />
+    <ProjectReference Include="..\TezGel.Persistence\TezGel.Persistence.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -8,6 +8,7 @@ using TezGel.Application.Expection;
 using TezGel.Application.Expections;
 using TezGel.Application.Interfaces;
 using TezGel.Application.Interfaces.Repositories;
+using TezGel.Application.Interfaces.Services;
 using TezGel.Domain.Entities;
 
 namespace TezGel.Application.Services
@@ -15,13 +16,16 @@ namespace TezGel.Application.Services
 
     public class ProductManager : IProductService
     {
+
         private readonly IProductRepository _productRepository;
         private readonly ICategoryRepository _categoryRepository;
+        private readonly ILockService _lockService;
 
-        public ProductManager(IProductRepository productRepository,ICategoryRepository categoryRepository)
+        public ProductManager(IProductRepository productRepository, ICategoryRepository categoryRepository, ILockService lockService)
         {
             _categoryRepository = categoryRepository;
             _productRepository = productRepository;
+            _lockService = lockService;
         }
 
         public async Task CreateProductAsync(ProductCreateRequest request)
@@ -62,29 +66,45 @@ namespace TezGel.Application.Services
             }
             catch (DbUpdateException ex)
             {
-                throw new BusinessException("Ürün kaydedilemedi. Lütfen geçerli veriler gönderin.",ex);
+                throw new BusinessException("Ürün kaydedilemedi. Lütfen geçerli veriler gönderin.", ex);
             }
         }
 
-        public async Task<List<ProductListResponse>> GetAllAsync()
+        public async Task<List<ProductListResponse>> GetAllProductsAsync()
         {
             var products = await _productRepository.GetAllWithIncludesAsync();
 
             if (products == null || !products.Any())
                 throw new NotFoundException("Hiç ürün bulunamadı.");
+            var list = new List<ProductListResponse>(products.Count);
 
-            return products.Select(p => new ProductListResponse
+            foreach (var p in products)
             {
-                Name = p.Name,
-                Description = p.Description,
-                OriginalPrice = p.OriginalPrice,
-                DiscountedPrice = p.DiscountedPrice,
-                ImagePath = p.ImagePath,
-                ExpireAt = p.ExpireAt,
-                Latitude = p.Latitude,
-                Longitude = p.Longitude,
-                CategoryName = p.Category?.Name ?? "-"
-            }).ToList();
+                var key = $"product:lock:{p.Id}";
+                var locked = await _lockService.IsLockedAsync(key);
+                list.Add(new ProductListResponse
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description,
+                    OriginalPrice = p.OriginalPrice,
+                    DiscountedPrice = p.DiscountedPrice,
+                    ImagePath = p.ImagePath,
+                    ExpireAt = p.ExpireAt,
+                    Latitude = p.Latitude,
+                    Longitude = p.Longitude,
+                    CategoryName = p.Category?.Name ?? "-",
+                    IsReserved = locked
+                });
+            }
+            return list;
+
+        }
+
+        public async Task<List<ProductListResponse>> GetAvailableProductsAsync()
+        {
+            var all = await GetAllProductsAsync();
+            return all.Where(p => !p.IsReserved).ToList();
         }
 
     }

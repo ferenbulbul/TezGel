@@ -14,6 +14,7 @@ namespace TezGel.Domain.Entities
         public DateTime BirthDate { get; set; }
 
         public AppUser AppUser { get; set; }
+        public ICollection<ActionReservation> ActionReservations { get; set; }
     }
 
 }

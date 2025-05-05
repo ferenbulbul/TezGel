@@ -21,6 +21,14 @@ using TokenOptions = TezGel.Domain.Common.TokenOptions;
 
 var builder = WebApplication.CreateBuilder(args);
 
+if (builder.Environment.IsProduction())
+{
+    builder.WebHost.ConfigureKestrel(serverOptions =>
+    {
+        serverOptions.ListenAnyIP(80);
+    });
+}
+
 Console.WriteLine("[DEBUG] Redis__Host = " + builder.Configuration["REDIS_CONNECTION_STRING"]); // Debugging için Redis bağlantı dizesini yazdır
 builder.Services.AddDbContext<TezGelDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -52,9 +60,6 @@ builder.Services.AddAuthentication(options =>
 }).AddJwtBearer(options =>
 {
     var tokenOptions = builder.Configuration.GetSection("TokenOptions").Get<TokenOptions>();
-
-
-
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
@@ -69,15 +74,27 @@ builder.Services.AddAuthentication(options =>
 });
 
 
-// builder.WebHost.ConfigureKestrel(serverOptions =>
-// {
-//     serverOptions.ListenAnyIP(80);
-// });
+
 
 builder.Services.Configure<TokenOptions>(builder.Configuration.GetSection("TokenOptions"));
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 
-builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect("localhost:6379"));
+
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+{
+    var redisConnectionString = Environment.GetEnvironmentVariable("REDIS_CONNECTION_STRING")
+        ?? builder.Configuration["Redis__Host"]
+        ?? "localhost:6379"; // fallback
+
+    Console.WriteLine($"[DEBUG] Redis bağlantı dizesi: {redisConnectionString}");
+
+    var config = ConfigurationOptions.Parse(redisConnectionString);
+    config.AbortOnConnectFail = false;
+    config.ConnectRetry = 5;
+    config.ConnectTimeout = 10000;
+
+    return ConnectionMultiplexer.Connect(config);
+});
 
 // builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 // {
@@ -196,13 +213,7 @@ builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
 
-if (app.Environment.IsProduction()) // veya: if (Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true")
-{
-    builder.WebHost.ConfigureKestrel(serverOptions =>
-    {
-        serverOptions.ListenAnyIP(80); // sadece Docker'da
-    });
-}
+
 
 app.UseMiddleware<ErrorHandlingMiddleware>();
 if (app.Environment.IsDevelopment() || app.Environment.IsProduction())

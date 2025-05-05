@@ -47,6 +47,8 @@ namespace TezGel.Infrastructure.HostedService
                         $"{toExpireActions.Count} rezervasyon, " +
                         $"{toExpireProducts.Count} ürün güncellendi.");
                 }
+
+                 await Task.Delay(_delay, stoppingToken);
             }
         }
     }

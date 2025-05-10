@@ -20,12 +20,14 @@ namespace TezGel.Application.Services
         private readonly IProductRepository _productRepository;
         private readonly ICategoryRepository _categoryRepository;
         private readonly ILockService _lockService;
+        private readonly IBusinessUserRepository _businessUserRepository;
 
-        public ProductManager(IProductRepository productRepository, ICategoryRepository categoryRepository, ILockService lockService)
+        public ProductManager(IProductRepository productRepository, ICategoryRepository categoryRepository, ILockService lockService, IBusinessUserRepository businessUserRepository)
         {
             _categoryRepository = categoryRepository;
             _productRepository = productRepository;
             _lockService = lockService;
+            _businessUserRepository = businessUserRepository;
         }
 
         public async Task CreateProductAsync(ProductCreateRequest request)
@@ -39,9 +41,12 @@ namespace TezGel.Application.Services
             if (request.DiscountedPrice > request.OriginalPrice)
                 throw new BusinessException("İndirimli fiyat, orijinal fiyattan yüksek olamaz.");
 
-            if (request.ExpireAt <= DateTime.UtcNow)
-                throw new BusinessException("Geçerlilik tarihi geçmiş olamaz.");
-
+            var business = await _businessUserRepository.GetByIdAsync(request.BusinessUserId);
+            var trZone = TimeZoneInfo.FindSystemTimeZoneById("Turkey Standard Time");
+            var todayTr = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, trZone).Date;
+            var localExpire = todayTr.Add(business.ClosingTime);
+            var expireDate = TimeZoneInfo.ConvertTimeToUtc(localExpire, trZone);
+            Console.WriteLine($"Expire Date: {expireDate}");
             var category = await _categoryRepository.GetByIdAsync(request.CategoryId);
             if (category == null)
                 throw new NotFoundException("Kategori bulunamadı.");
@@ -55,7 +60,7 @@ namespace TezGel.Application.Services
                 Latitude = request.Latitude,
                 Longitude = request.Longitude,
                 ImagePath = request.ImagePath,
-                ExpireAt = request.ExpireAt,
+                ExpireAt = expireDate,
                 BusinessUserId = request.BusinessUserId,
                 CreatedDate = DateTime.UtcNow,
                 IsActive = true

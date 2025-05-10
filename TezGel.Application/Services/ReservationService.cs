@@ -16,6 +16,7 @@ namespace TezGel.Application.Services
         private readonly IProductRepository _productRepo;
         private readonly IActionRepository _resRepo;
 
+
         public ReservationService(
             ILockService lockService,
             IProductRepository productRepo,
@@ -37,9 +38,8 @@ namespace TezGel.Application.Services
             var lockKey = $"product:lock:{productId}";
             var locked = await _lockService.TryAcquireLockAsync(lockKey, TimeSpan.FromMinutes(10));
             if (!locked)
-                throw new InvalidOperationException("Ürün başka bir kullanıcıya zaten rezerve edilmiş.");
+                throw new InvalidOperationException("Ürün başka bir kullanıcıya zaten rezerve edilmiş veya rezerve aşamasında  .");
 
-            // 3) Rezervasyonu oluştur ve kaydet (AddAsync içinde SaveChanges var)
             var reservation = new ActionReservation
             {
                 UserId = userId,

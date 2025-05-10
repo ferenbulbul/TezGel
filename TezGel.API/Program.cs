@@ -169,6 +169,8 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IActionRepository, ActionRepository>();
 builder.Services.AddScoped<ILockService, RedisLockService>();
 builder.Services.AddScoped<IReservationService, ReservationService>();
+builder.Services.AddScoped<IBusinessUserRepository, BusinessUserRepository>();
+builder.Services.AddScoped<ITimeZoneService, TimeZoneService>();
 
 
 

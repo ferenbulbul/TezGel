@@ -11,7 +11,7 @@ namespace TezGel.Domain.Entities
         public Guid Id { get; set; }  // PK ve FK (AppUser.Id)
         public string CompanyName { get; set; }
         public string CompanyType { get; set; }
-
+        public TimeSpan ClosingTime { get; set; }
         public AppUser AppUser { get; set; }
 
     }

@@ -102,6 +102,7 @@ namespace TezGel.Application.Services
             var business = new BusinessUser
             {
                 Id = user.Id,
+                ClosingTime = dto.ClosingTime,
                 CompanyName = dto.CompanyName,
                 CompanyType = dto.CompanyType
             };

@@ -56,7 +56,9 @@ namespace TezGel.Application.Services
                 LastName = dto.LastName,
                 UserName = dto.UserName,
                 Email = dto.Email,
-                UserType = UserType.Customer
+                UserType = UserType.Customer,
+                Latitude=dto.Latitude,
+                Longitute=dto.Longitute
             };
 
             var result = await _userManager.CreateAsync(user, dto.Password);
@@ -88,7 +90,9 @@ namespace TezGel.Application.Services
                 LastName = dto.LastName,   
                 UserName = dto.UserName,
                 Email = dto.Email,
-                UserType = UserType.Business
+                UserType = UserType.Business,
+                Latitude=dto.Latitude,
+                Longitute=dto.Longitute
             };
 
             var result = await _userManager.CreateAsync(user, dto.Password);

@@ -12,6 +12,8 @@ namespace TezGel.Application.DTOs.Auth
         public string Email { get; set; }
         public string Password { get; set; }
         public string UserName { get; set; }
+        public double Longitute { get; set; }
+        public double Latitude { get; set; }
         public TimeSpan ClosingTime { get; set; }
         public string CompanyName { get; set; }
         public string CompanyType { get; set; }

@@ -12,7 +12,11 @@ namespace TezGel.Application.Validators.Auth
         public CustomerRegisterRequestValidator()
         {
             RuleFor(x => x.Email).NotEmpty().EmailAddress().WithMessage("Geçersiz e-posta adresi");
-            RuleFor(x => x.Password).NotEmpty().MinimumLength(6);
+            RuleFor(x => x.Password)
+             .NotEmpty()
+             .MinimumLength(6)
+             .Matches(@"^(?=.*[A-Za-z])(?=.*\d).+$")
+             .WithMessage("Password must contain at least one letter and one number.");
             RuleFor(x => x.UserName).NotEmpty();
             RuleFor(x => x.Address).NotEmpty();
             RuleFor(x => x.BirthDate).LessThan(DateTime.Now).WithMessage("Doğum tarihi geçmiş bir tarih olmalıdır.");

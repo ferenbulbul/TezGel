@@ -1,11 +1,15 @@
 
 using System.Text;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using RabbitMQ.Client;
 using StackExchange.Redis;
 using TezGel.API.Middlewares;
+using TezGel.Application.DTOs.Auth;
 using TezGel.Application.Interfaces;
 using TezGel.Application.Interfaces.Repositories;
 using TezGel.Application.Interfaces.Services;
@@ -13,6 +17,7 @@ using TezGel.Application.Services;
 using TezGel.Domain.Common;
 using TezGel.Domain.Entities;
 using TezGel.Infrastructure.HostedService;
+using TezGel.Infrastructure.Messaging;
 using TezGel.Infrastructure.Services;
 using TezGel.Persistence.Context;
 using TezGel.Persistence.Repositories;
@@ -29,7 +34,7 @@ if (builder.Environment.IsProduction())
     });
 }
 
-Console.WriteLine("[DEBUG] Redis__Host = " + builder.Configuration["REDIS_CONNECTION_STRING"]); // Debugging için Redis bağlantı dizesini yazdır
+
 builder.Services.AddDbContext<TezGelDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -79,6 +84,18 @@ builder.Services.AddAuthentication(options =>
 builder.Services.Configure<TokenOptions>(builder.Configuration.GetSection("TokenOptions"));
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 
+builder.Services.AddSingleton<IConnectionFactory>(sp =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+    return new ConnectionFactory
+    {
+        HostName = config["RabbitMQ:HostName"],
+        UserName = config["RabbitMQ:UserName"],
+        Password = config["RabbitMQ:Password"]
+    };
+});
+
+builder.Services.AddHostedService<RabbitMqInitializerService>();
 
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 {
@@ -171,31 +188,35 @@ builder.Services.AddScoped<ILockService, RedisLockService>();
 builder.Services.AddScoped<IReservationService, ReservationService>();
 builder.Services.AddScoped<IBusinessUserRepository, BusinessUserRepository>();
 builder.Services.AddScoped<ITimeZoneService, TimeZoneService>();
+builder.Services.AddScoped<IMessagePublisher, RabbitMqPublisher>();
 
 
 
 
 builder.Services.AddControllers();
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddFluentValidationClientsideAdapters();
+builder.Services.AddValidatorsFromAssemblyContaining<BusinessRegisterRequest>();
 builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen(c =>
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "TezGel API", Version = "v1" });
+
+    // JWT Authentication ayarları
+    var securityScheme = new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+    };
+
+    c.AddSecurityDefinition("Bearer", securityScheme);
+
+    var securityRequirement = new OpenApiSecurityRequirement
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "TezGel API", Version = "v1" });
-
-                // JWT Authentication ayarları
-                var securityScheme = new OpenApiSecurityScheme
-                {
-                    Name = "Authorization",
-                    Type = SecuritySchemeType.Http,
-                    Scheme = "bearer",
-                    BearerFormat = "JWT",
-                    In = ParameterLocation.Header,
-                    Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
-                };
-
-                c.AddSecurityDefinition("Bearer", securityScheme);
-
-                var securityRequirement = new OpenApiSecurityRequirement
-                        {
                            {
                                 new OpenApiSecurityScheme
                                 {
@@ -207,10 +228,10 @@ builder.Services.AddEndpointsApiExplorer();
                                 },
                                 new string[] {}
                             }
-                        };
+            };
 
-                c.AddSecurityRequirement(securityRequirement);
-            });
+    c.AddSecurityRequirement(securityRequirement);
+});
 
 
 var app = builder.Build();

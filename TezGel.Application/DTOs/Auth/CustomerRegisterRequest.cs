@@ -13,6 +13,8 @@ namespace TezGel.Application.DTOs.Auth
         public string Password { get; set; }
         public string UserName { get; set; }
         public string Address { get; set; }
+        public double Longitute { get; set; }
+        public double Latitude { get; set; }
         public DateTime BirthDate { get; set; }
     }
 

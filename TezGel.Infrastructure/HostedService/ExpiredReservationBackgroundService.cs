@@ -27,10 +27,11 @@ namespace TezGel.Infrastructure.HostedService
                 using var scope = _serviceProvider.CreateScope();
                 var db = scope.ServiceProvider.GetRequiredService<TezGelDbContext>();
 
-                var toExpireActions = await db.ActionReservations
-                    .Where(r => r.Status == ActionStatus.Pending
-                             && r.ExpireAt <= DateTime.UtcNow)
-                    .ToListAsync(stoppingToken);
+                // var toExpireActions = await db.ActionReservations
+                //     .Where(r => r.Status == ActionStatus.Pending
+                //              && r.ExpireAt <= DateTime.UtcNow)
+                //     .ToListAsync(stoppingToken);
+                var toExpireActions = new List<Domain.Entities.ActionReservation>();
 
                 var toExpireProducts = await db.Products
                     .Where(p => p.IsActive && p.ExpireAt <= DateTime.UtcNow)
@@ -41,7 +42,7 @@ namespace TezGel.Infrastructure.HostedService
                     toExpireActions.ForEach(r => r.Status = ActionStatus.Expired);
                     toExpireProducts.ForEach(p => p.IsActive = false);
 
-                    await db.SaveChangesAsync(stoppingToken);
+                     _ = await db.SaveChangesAsync(stoppingToken);
 
                     Console.WriteLine($"[{DateTime.UtcNow}] " +
                         $"{toExpireActions.Count} rezervasyon, " +

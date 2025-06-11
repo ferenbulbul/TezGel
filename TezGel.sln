@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TezGel.Infrastructure", "Te
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TezGel.Persistence", "TezGel.Persistence\TezGel.Persistence.csproj", "{80063120-7B3D-4198-B7CF-86D55CC5486C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TezGel.ReservationConsumer", "TezGel.ReservationConsumer\TezGel.ReservationConsumer.csproj", "{3338EE17-EA1F-42B1-B1F6-933A8E413BE5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,5 +44,9 @@ Global
 		{80063120-7B3D-4198-B7CF-86D55CC5486C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{80063120-7B3D-4198-B7CF-86D55CC5486C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{80063120-7B3D-4198-B7CF-86D55CC5486C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3338EE17-EA1F-42B1-B1F6-933A8E413BE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3338EE17-EA1F-42B1-B1F6-933A8E413BE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3338EE17-EA1F-42B1-B1F6-933A8E413BE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3338EE17-EA1F-42B1-B1F6-933A8E413BE5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

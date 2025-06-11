@@ -8,11 +8,11 @@ using TezGel.Persistence.Context;
 
 namespace TezGel.Persistence.Repositories
 {
-    public class ActionRepository:GenericRepository<ActionReservation>, IActionRepository
+    public class ActionRepository : GenericRepository<ActionReservation>, IActionRepository
     {
         public ActionRepository(TezGelDbContext context) : base(context)
         {
         }
-        
+
     }
 }

@@ -281,6 +281,9 @@ namespace TezGel.Persistence.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
+                    b.Property<TimeSpan>("ClosingTime")
+                        .HasColumnType("interval");
+
                     b.Property<string>("CompanyName")
                         .IsRequired()
                         .HasColumnType("text");
@@ -334,7 +337,7 @@ namespace TezGel.Persistence.Migrations
                         new
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
-                            CreatedDate = new DateTime(2025, 5, 3, 14, 19, 55, 4, DateTimeKind.Utc).AddTicks(9850),
+                            CreatedDate = new DateTime(2025, 5, 10, 13, 14, 53, 277, DateTimeKind.Utc).AddTicks(7330),
                             Description = "Tatlı ve şekerli ürünler",
                             IsDeleted = false,
                             Name = "Tatlı"
@@ -342,7 +345,7 @@ namespace TezGel.Persistence.Migrations
                         new
                         {
                             Id = new Guid("22222222-2222-2222-2222-222222222222"),
-                            CreatedDate = new DateTime(2025, 5, 3, 14, 19, 55, 4, DateTimeKind.Utc).AddTicks(9860),
+                            CreatedDate = new DateTime(2025, 5, 10, 13, 14, 53, 277, DateTimeKind.Utc).AddTicks(7330),
                             Description = "Poğaça, börek, çörek",
                             IsDeleted = false,
                             Name = "Hamur İşi"
@@ -350,7 +353,7 @@ namespace TezGel.Persistence.Migrations
                         new
                         {
                             Id = new Guid("33333333-3333-3333-3333-333333333333"),
-                            CreatedDate = new DateTime(2025, 5, 3, 14, 19, 55, 4, DateTimeKind.Utc).AddTicks(9860),
+                            CreatedDate = new DateTime(2025, 5, 10, 13, 14, 53, 277, DateTimeKind.Utc).AddTicks(7340),
                             Description = "Soğuk ve sıcak içecekler",
                             IsDeleted = false,
                             Name = "İçecek"

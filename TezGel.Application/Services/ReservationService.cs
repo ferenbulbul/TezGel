@@ -34,7 +34,7 @@ namespace TezGel.Application.Services
             _logger = logger;
         }
 
-        public async Task<ActionReservation> ReserveProductAsync(Guid userId, Guid productId) // Dönüş tipini ActionReservation yaptım
+        public async Task<ActionReservation> ReserveProductAsync(Guid userId, Guid productId) 
         {
            // _logger.LogInformation("Attempting to reserve product {ProductId} for user {UserId}", productId, userId);
 

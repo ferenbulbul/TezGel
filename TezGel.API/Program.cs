@@ -170,7 +170,7 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 //     }
 // });
 
-builder.Services.AddHostedService<ExpiredReservationBackgroundService>();
+//builder.Services.AddHostedService<ExpiredReservationBackgroundService>();
 builder.Services.AddScoped<IMailService, MailService>();
 builder.Services.AddScoped<IRedisService, RedisService>();
 
@@ -189,6 +189,7 @@ builder.Services.AddScoped<IReservationService, ReservationService>();
 builder.Services.AddScoped<IBusinessUserRepository, BusinessUserRepository>();
 builder.Services.AddScoped<ITimeZoneService, TimeZoneService>();
 builder.Services.AddScoped<IMessagePublisher, RabbitMqPublisher>();
+builder.Services.AddScoped<ICustomerService, CustomerManager>();
 
 
 

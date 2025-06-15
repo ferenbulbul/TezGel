@@ -30,6 +30,7 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
+
   tezgel-api:
     build:
       context: .
@@ -40,6 +41,22 @@ services:
       - postgres
       - redis
       - rabbitmq       
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=tezgeldb;Username=myuser;Password=mypass
+      - REDIS_CONNECTION_STRING=redis:6379
+      - RabbitMQ__HostName=rabbitmq     
+      - RabbitMQ__UserName=guest
+      - RabbitMQ__Password=guest
+
+  reservation-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings__DefaultConnection=Host=postgres;Database=tezgeldb;Username=myuser;Password=mypass

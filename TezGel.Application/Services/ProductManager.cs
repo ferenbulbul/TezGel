@@ -33,7 +33,7 @@ namespace TezGel.Application.Services
             _userManager = userManager;
         }
 
-        public async Task CreateProductAsync(ProductCreateRequest request)
+        public async Task CreateProductAsync(ProductCreateRequest request,Guid userId)
         {
             if (string.IsNullOrWhiteSpace(request.Name))
                 throw new BusinessException("Ürün adı boş olamaz.");
@@ -44,7 +44,10 @@ namespace TezGel.Application.Services
             if (request.DiscountedPrice > request.OriginalPrice)
                 throw new BusinessException("İndirimli fiyat, orijinal fiyattan yüksek olamaz.");
 
-            var business = await _businessUserRepository.GetByIdAsync(request.BusinessUserId);
+            var business = await _businessUserRepository.GetByIdAsync(userId);
+            var business2 = await _userManager.FindByIdAsync(userId.ToString());
+            if (business == null || business2 == null)
+                throw new NotFoundException("İşletme bulunamadı.");
             var trZone = TimeZoneInfo.FindSystemTimeZoneById("Turkey Standard Time");
             var todayTr = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, trZone).Date;
             var localExpire = todayTr.Add(business.ClosingTime);
@@ -60,11 +63,11 @@ namespace TezGel.Application.Services
                 OriginalPrice = request.OriginalPrice,
                 DiscountedPrice = request.DiscountedPrice,
                 CategoryId = request.CategoryId,
-                Latitude = request.Latitude,
-                Longitude = request.Longitude,
+                Latitude = business2.Latitude,
+                Longitude = business2.Longitute,
                 ImagePath = request.ImagePath,
                 ExpireAt = expireDate,
-                BusinessUserId = request.BusinessUserId,
+                BusinessUserId = userId,
                 CreatedDate = DateTime.UtcNow,
                 IsActive = true
             };
@@ -124,7 +127,7 @@ namespace TezGel.Application.Services
                     p.DistanceInMeters = distance;
                     return p;
                 })
-                .Where(p => p.DistanceInMeters <= 900)
+                .Where(p => p.DistanceInMeters <= 9000000)
                 .ToList();
             ;
 

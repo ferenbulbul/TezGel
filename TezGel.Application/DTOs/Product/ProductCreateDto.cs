@@ -13,10 +13,7 @@ namespace TezGel.Application.DTOs.Product
         public decimal OriginalPrice { get; set; }
         public decimal DiscountedPrice { get; set; }
         public Guid CategoryId { get; set; }
-        public double Latitude { get; set; }
-        public double Longitude { get; set; }
         public string ImagePath { get; set; }
-        public Guid BusinessUserId { get; set; }
 
     }
 

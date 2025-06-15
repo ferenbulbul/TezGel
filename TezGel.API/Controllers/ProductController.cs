@@ -32,9 +32,8 @@ namespace TezGel.API.Controllers
         public async Task<IActionResult> Create([FromBody] ProductCreateRequest request)
         {
             var userId = GetUserIdFromToken();
-            request.BusinessUserId = userId;
 
-            await _productService.CreateProductAsync(request);
+            await _productService.CreateProductAsync(request, userId);
             return Ok(ApiResponse<string>.SuccessResponse(null, "Ürün başarıyla eklendi."));
         }
 

@@ -1,8 +1,7 @@
-# Build aşaması
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Çözüm dosyasını ve csproj dosyalarını kopyala
+# Önce sadece sln ve csproj dosyaları kopyalanır
 COPY *.sln .
 COPY TezGel.Application/*.csproj TezGel.Application/
 COPY TezGel.Domain/*.csproj TezGel.Domain/
@@ -11,18 +10,17 @@ COPY TezGel.Persistence/*.csproj TezGel.Persistence/
 COPY TezGel.API/*.csproj TezGel.API/
 COPY TezGel.ReservationConsumer/*.csproj TezGel.ReservationConsumer/
 
-# NuGet paketlerini restore et
+# dotnet restore (csproj dosyaları üzerinden)
 RUN dotnet restore
 
-# Tüm projeyi kopyala ve publish et
+# 🔁 Şimdi tüm dosyalar kopyalanır (klasörleriyle birlikte)
 COPY . .
-WORKDIR /src/TezGel.API
+
+WORKDIR /src/TezGel.ReservationConsumer
 RUN dotnet publish -c Release -o /app/publish
 
-# Çalışacak runtime ortamı (hafif image)
+# Runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
 COPY --from=build /app/publish .
-
-# Uygulamayı başlat
-ENTRYPOINT ["dotnet", "TezGel.API.dll"]
+ENTRYPOINT ["dotnet", "TezGel.ReservationConsumer.dll"]

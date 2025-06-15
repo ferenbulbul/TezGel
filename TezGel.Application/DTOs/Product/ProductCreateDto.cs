@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TezGel.Application.DTOs.Product
 {
-     public class ProductCreateRequest
+    public class ProductCreateRequest
     {
         public string Name { get; set; }
         public string Description { get; set; }
@@ -17,6 +17,7 @@ namespace TezGel.Application.DTOs.Product
         public double Longitude { get; set; }
         public string ImagePath { get; set; }
         public Guid BusinessUserId { get; set; }
+
     }
-    
+
 }

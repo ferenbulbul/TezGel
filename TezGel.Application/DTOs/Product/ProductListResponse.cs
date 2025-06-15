@@ -17,6 +17,7 @@ namespace TezGel.Application.DTOs.Product
         public double Latitude { get; set; }
         public double Longitude { get; set; }
         public string CategoryName { get; set; }
-         public bool IsReserved { get; set; }
+        public bool IsReserved { get; set; }
+        public double DistanceInMeters { get; set; }
     }
 }

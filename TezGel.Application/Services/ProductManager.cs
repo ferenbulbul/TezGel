@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TezGel.Application.DTOs.Product;
 using TezGel.Application.Expection;
@@ -21,13 +22,15 @@ namespace TezGel.Application.Services
         private readonly ICategoryRepository _categoryRepository;
         private readonly ILockService _lockService;
         private readonly IBusinessUserRepository _businessUserRepository;
+        private readonly UserManager<AppUser> _userManager;
 
-        public ProductManager(IProductRepository productRepository, ICategoryRepository categoryRepository, ILockService lockService, IBusinessUserRepository businessUserRepository)
+        public ProductManager(IProductRepository productRepository, ICategoryRepository categoryRepository, ILockService lockService, IBusinessUserRepository businessUserRepository, UserManager<AppUser> userManager)
         {
             _categoryRepository = categoryRepository;
             _productRepository = productRepository;
             _lockService = lockService;
             _businessUserRepository = businessUserRepository;
+            _userManager = userManager;
         }
 
         public async Task CreateProductAsync(ProductCreateRequest request)
@@ -106,11 +109,44 @@ namespace TezGel.Application.Services
 
         }
 
-        public async Task<List<ProductListResponse>> GetAvailableProductsAsync()
+        public async Task<List<ProductListResponse>> GetAvailableProductsAsync(Guid userId)
         {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user == null)
+                throw new NotFoundException("Kullanıcı bulunamadı.");
             var all = await GetAllProductsAsync();
-            return all.Where(p => !p.IsReserved).ToList();
+
+            return all
+                .Where(p => !p.IsReserved)
+                .Select(p =>
+                {
+                    var distance = CalculateDistanceInMeters(user.Latitude, user.Longitute, p.Latitude, p.Longitude);
+                    p.DistanceInMeters = distance;
+                    return p;
+                })
+                .Where(p => p.DistanceInMeters <= 900)
+                .ToList();
+            ;
+
         }
+
+        private static double CalculateDistanceInMeters(double lat1, double lon1, double lat2, double lon2)
+        {
+            const double EarthRadius = 6371000; // metre
+
+            double dLat = ToRadians(lat2 - lat1);
+            double dLon = ToRadians(lon2 - lon1);
+
+            double a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                       Math.Cos(ToRadians(lat1)) * Math.Cos(ToRadians(lat2)) *
+                       Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+
+            double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+
+            return EarthRadius * c;
+        }
+
+        private static double ToRadians(double angle) => angle * Math.PI / 180.0;
 
     }
 }

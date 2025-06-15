@@ -46,10 +46,12 @@ namespace TezGel.API.Controllers
             return Ok(response);
         }
 
-         [HttpGet("available")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpGet("available")]
         public async Task<IActionResult> GetAvailable()
         {
-            var products = await _productService.GetAvailableProductsAsync();
+            var userId = GetUserIdFromToken();
+            var products = await _productService.GetAvailableProductsAsync(userId);
             var response = ApiResponse<List<ProductListResponse>>
                                .SuccessResponse(products, "Mevcut ürünler başarıyla getirildi.");
             return Ok(response);

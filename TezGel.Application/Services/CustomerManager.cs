@@ -19,7 +19,7 @@ namespace TezGel.Application.Services
             _userManager = userManager;
         }
 
-        public async Task LocationUpdateAsync(Guid customerId,LocationRequest locationRequest)
+        public async Task LocationUpdateAsync(Guid customerId, LocationRequest locationRequest)
         {
             var customer = await _userManager.FindByIdAsync(customerId.ToString());
             if (customer == null)
@@ -34,5 +34,6 @@ namespace TezGel.Application.Services
 
             }
         }
+        
     }
 }

@@ -10,6 +10,6 @@ namespace TezGel.Application.Interfaces
     {
         Task CreateProductAsync(ProductCreateRequest request);
         Task<List<ProductListResponse>> GetAllProductsAsync();
-        Task<List<ProductListResponse>> GetAvailableProductsAsync();
+        Task<List<ProductListResponse>> GetAvailableProductsAsync(Guid userId);
     }
 }

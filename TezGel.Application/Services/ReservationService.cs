@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
+using TezGel.Application.DTOs.ActionReservation;
 using TezGel.Application.DTOs.RabbitMq;
 using TezGel.Application.Expections;
 using TezGel.Application.Interfaces.Repositories;
@@ -17,26 +19,30 @@ namespace TezGel.Application.Services
         private readonly ILockService _lockService;
         private readonly IProductRepository _productRepo;
         private readonly IActionRepository _resRepo;
-        private readonly IMessagePublisher _messagePublisher; 
+        private readonly IMessagePublisher _messagePublisher;
         private readonly ILogger<ReservationService> _logger;
+        private readonly UserManager<AppUser> _userManager;
+
 
 
         public ReservationService(
             ILockService lockService,
             IProductRepository productRepo,
-            IActionRepository resRepo,IMessagePublisher messagePublisher,
-            ILogger<ReservationService> logger)
+            IActionRepository resRepo, IMessagePublisher messagePublisher,
+            ILogger<ReservationService> logger,
+            UserManager<AppUser> userManager)
         {
             _lockService = lockService;
             _productRepo = productRepo;
             _resRepo = resRepo;
             _messagePublisher = messagePublisher;
+            _userManager = userManager;
             _logger = logger;
         }
 
-        public async Task<ActionReservation> ReserveProductAsync(Guid userId, Guid productId) 
+        public async Task<ActionReservation> ReserveProductAsync(Guid userId, Guid productId)
         {
-           // _logger.LogInformation("Attempting to reserve product {ProductId} for user {UserId}", productId, userId);
+            // _logger.LogInformation("Attempting to reserve product {ProductId} for user {UserId}", productId, userId);
 
             // 1) Ürün var mı, aktif mi, tarihi geçmiş mi?
             var product = await _productRepo.GetByIdAsync(productId);
@@ -116,8 +122,17 @@ namespace TezGel.Application.Services
             return reservation; // Başarılı yanıt
         }
 
-        public async Task CompleteReservationAsync(Guid reservationId)
+        public async Task CompleteReservationAsync(Guid reservationId, Guid businessQrid)
         {
+            var business = await _userManager.FindByIdAsync(businessQrid.ToString());
+
+            if (business == null)
+                throw new NotFoundException($"Qr {businessQrid} bulunamadı.");
+
+            if (business.UserType != UserType.Business)
+                throw new UnauthorizedAccessException("Bu kullanıcı bir işletme değil.");
+
+            // 1) Rezervasyon kaydını al
             var reservation = await _resRepo.GetByIdAsync(reservationId)
        ?? throw new NotFoundException($"Rezervasyon '{reservationId}' bulunamadı.");
 
@@ -141,9 +156,19 @@ namespace TezGel.Application.Services
             await _productRepo.UpdateAsync(product);
         }
 
-        public Task Task<ActionReservation>(Guid userId, Guid productId)
+        public async Task<ActionReservation> GetReservationByIdAsync(Guid reservationId)
         {
-            throw new NotImplementedException();
+            var reservation = await _resRepo.GetByIdAsync(reservationId);
+            if (reservation == null)
+                throw new NotFoundException($"Rezervasyon '{reservationId}' bulunamadı.");
+            return reservation;
+        }
+        public async Task<List<RezervationResponseList>> GetReservationByUserIdAsync(Guid userId)
+        {
+            var reservations = await _resRepo.GetReservationsAsync(userId);
+            if (reservations == null || !reservations.Any())
+                throw new NotFoundException($"Kullanıcı '{userId}' için rezervasyon bulunamadı.");
+            return reservations;
         }
     }
 }

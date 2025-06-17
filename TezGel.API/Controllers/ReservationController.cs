@@ -37,14 +37,7 @@ namespace TezGel.API.Controllers
             return Ok(ApiResponse<bool>.SuccessResponse(true, "Rezervasyon tamamlandı ve ürün pasif hale getirildi."));
 
         }
-        [HttpGet("reservationlist")]
-        [Authorize(AuthenticationSchemes = "Bearer")]
-        public async Task<IActionResult> GetReservationListByid()
-        {
-            var userId = GetUserIdFromToken();
-            var reservations = await _reservationService.GetReservationByUserIdAsync(userId);
-            return Ok(ApiResponse<List<RezervationResponseList>>.SuccessResponse(reservations, "Rezervasyon listesi getirildi."));
-        }
+        
        
     }
 }

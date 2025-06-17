@@ -113,7 +113,7 @@ namespace TezGel.Application.Services
 
             await _businessUserRepository.AddAsync(business);
         }
-        public async Task<(string AccessToken, string RefreshToken, bool EmailConfirmed)> LoginAsync(string email, string password)
+        public async Task<(string AccessToken, string RefreshToken, bool EmailConfirmed,string Role)> LoginAsync(string email, string password)
         {
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
@@ -129,8 +129,8 @@ namespace TezGel.Application.Services
             user.RefreshToken = refreshToken;
             user.RefreshTokenExpireDate = DateTime.UtcNow.AddDays(7);
             await _userManager.UpdateAsync(user);
-
-            return (accessToken, refreshToken, user.EmailConfirmed);
+            var role = user.UserType.ToString();
+            return (accessToken, refreshToken, user.EmailConfirmed, role);
         }
         public async Task<(string AccessToken, string RefreshToken)> RefreshTokenAsync(string refreshToken)
         {

@@ -44,14 +44,16 @@ namespace TezGel.API.Controllers
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
 
-            var (accessToken, refreshToken, emailConfirmed) = await _authService.LoginAsync(request.Username, request.Password);
+            var (accessToken, refreshToken, emailConfirmed,role) = await _authService.LoginAsync(request.Username, request.Password);
 
 
             var response = ApiResponse<object>.SuccessResponse(new
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
-                EmailConfirmed = emailConfirmed
+                EmailConfirmed = emailConfirmed,
+                Role = role
+
             }, "Giriş başarılı.", 200);
 
             return Ok(response);

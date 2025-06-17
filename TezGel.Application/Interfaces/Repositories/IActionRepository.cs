@@ -9,6 +9,11 @@ namespace TezGel.Application.Interfaces.Repositories
 {
     public interface IActionRepository : IGenericRepository<ActionReservation>
     {
-        Task<List<RezervationResponseList>> GetReservationsAsync(Guid userId);
+        Task<List<RezervationResponseList>> GetReservationsByCustomerIdAsync(Guid userId);
+        Task<RezervationResponseList> GetReservationByCustomerIdAsync(Guid reservationId);
+        Task<string> GetReservationStatusAsync(Guid reservationId);
+        Task<List<RezervationResponseListBusiness>> GetReservationsByBusinessIdAsync(Guid businessId);
+        Task<RezervationResponseListBusiness?> GetReservationByBusinessIdAsync(Guid businessId);
+        
     }
 }

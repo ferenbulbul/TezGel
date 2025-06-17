@@ -170,7 +170,7 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 //     }
 // });
 
-//builder.Services.AddHostedService<ExpiredReservationBackgroundService>();
+builder.Services.AddHostedService<ExpiredReservationBackgroundService>();
 builder.Services.AddScoped<IMailService, MailService>();
 builder.Services.AddScoped<IRedisService, RedisService>();
 

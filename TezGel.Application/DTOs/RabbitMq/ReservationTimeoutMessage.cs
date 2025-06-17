@@ -8,7 +8,7 @@ namespace TezGel.Application.DTOs.RabbitMq
 
     public class ReservationTimeoutMessage
     {
-        public Guid ReservationId { get; set; } // Veritabanındaki ActionReservation ID'si
+        public Guid ReservationId { get; set; } 
         public Guid ProductId { get; set; }
         public Guid UserId { get; set; }
         public DateTime CreatedAtUtc { get; set; }

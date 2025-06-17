@@ -14,6 +14,6 @@ namespace TezGel.Persistence.Repositories
         {
         }
 
-        // BusinessUser'a özel metodlar buraya gelebilir.
+        
     }
 }

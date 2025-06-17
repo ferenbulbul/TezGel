@@ -12,5 +12,9 @@ namespace TezGel.Application.Interfaces.Services
         Task<ActionReservation> ReserveProductAsync(Guid userId, Guid productId);
         Task CompleteReservationAsync(Guid reservationId, Guid businessQrid);
         Task<List<RezervationResponseList>> GetReservationByUserIdAsync(Guid userId);
+        Task<RezervationResponseList> GetReservationByIdAsync(Guid reservationId);
+        Task<string> GetReservationStatusAsync(Guid reservationId);
+        Task<List<RezervationResponseListBusiness>> GetReservationResponseListBusinessAsync(Guid businessId);
+        Task<RezervationResponseListBusiness> GetReservationBusinessAsync(Guid reservationId);
     }
 }

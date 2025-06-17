@@ -13,6 +13,8 @@ using TezGel.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using TezGel.Application.DTOs.Auth.Comman;
+using System.Data.Common;
+using TezGel.Domain.Entities;
 
 namespace TezGel.API.Controllers
 {
@@ -26,15 +28,6 @@ namespace TezGel.API.Controllers
         public ProductController(IProductService productService)
         {
             _productService = productService;
-        }
-        [Authorize(AuthenticationSchemes = "Bearer")]
-        [HttpPost("create")]
-        public async Task<IActionResult> Create([FromBody] ProductCreateRequest request)
-        {
-            var userId = GetUserIdFromToken();
-
-            await _productService.CreateProductAsync(request, userId);
-            return Ok(ApiResponse<string>.SuccessResponse(null, "Ürün başarıyla eklendi."));
         }
 
         [HttpGet("all")]
@@ -53,6 +46,15 @@ namespace TezGel.API.Controllers
             var products = await _productService.GetAvailableProductsAsync(userId);
             var response = ApiResponse<List<ProductListResponse>>
                                .SuccessResponse(products, "Mevcut ürünler başarıyla getirildi.");
+            return Ok(response);
+        }
+
+        [HttpGet("category-list")]
+        public async Task<IActionResult> CategoryList()
+        {
+            var categories = await _productService.GetCategoryList();
+            var response = ApiResponse<List<CategoryResponse>>
+                               .SuccessResponse(categories, "Mevcut categoryler başarıyla getirildi.");
             return Ok(response);
         }
     }

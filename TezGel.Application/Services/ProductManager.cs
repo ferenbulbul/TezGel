@@ -24,6 +24,7 @@ namespace TezGel.Application.Services
         private readonly IBusinessUserRepository _businessUserRepository;
         private readonly UserManager<AppUser> _userManager;
 
+
         public ProductManager(IProductRepository productRepository, ICategoryRepository categoryRepository, ILockService lockService, IBusinessUserRepository businessUserRepository, UserManager<AppUser> userManager)
         {
             _categoryRepository = categoryRepository;
@@ -33,7 +34,7 @@ namespace TezGel.Application.Services
             _userManager = userManager;
         }
 
-        public async Task CreateProductAsync(ProductCreateRequest request,Guid userId)
+        public async Task CreateProductAsync(ProductCreateRequest request, Guid userId)
         {
             if (string.IsNullOrWhiteSpace(request.Name))
                 throw new BusinessException("Ürün adı boş olamaz.");
@@ -85,7 +86,7 @@ namespace TezGel.Application.Services
         {
             var products = await _productRepository.GetAllWithIncludesAsync();
 
-            if (products == null || !products.Any())
+            if (products == null)
                 throw new NotFoundException("Hiç ürün bulunamadı.");
             var list = new List<ProductListResponse>(products.Count);
 
@@ -105,7 +106,7 @@ namespace TezGel.Application.Services
                     Latitude = p.Latitude,
                     Longitude = p.Longitude,
                     CategoryName = p.Category?.Name ?? "-",
-                    IsReserved = locked
+                    IsReserved = locked,
                 });
             }
             return list;
@@ -120,7 +121,7 @@ namespace TezGel.Application.Services
             var all = await GetAllProductsAsync();
 
             return all
-                .Where(p => !p.IsReserved)
+                .Where(p => !p.IsReserved && p.ExpireAt > DateTime.UtcNow)
                 .Select(p =>
                 {
                     var distance = CalculateDistanceInMeters(user.Latitude, user.Longitute, p.Latitude, p.Longitude);
@@ -151,5 +152,69 @@ namespace TezGel.Application.Services
 
         private static double ToRadians(double angle) => angle * Math.PI / 180.0;
 
+        public async Task<List<CategoryResponse>> GetCategoryList()
+        {
+            var categoryList = await _categoryRepository.GetAllAsync();
+            if (categoryList == null)
+                throw new NotFoundException($"Category bulunamadı.");
+            var categoryListResponse = new List<CategoryResponse>();
+            foreach (var category in categoryList)
+            {
+                categoryListResponse.Add(new CategoryResponse
+                {
+                    Id = category.Id,
+                    Name = category.Name,
+                    Description = category.Description,
+                });
+            }
+            return categoryListResponse;
+        }
+        public async Task<List<BusinessProductListResponse>> GetAllProductsByBusinessUserIdAsync(Guid businessUserId)
+        {
+            var products = await _productRepository.GetAllProductByBusinessUserIdAsync(businessUserId);
+            var businessProduct = new List<BusinessProductListResponse>();
+            foreach (var p in products)
+            {
+                var key = $"product:lock:{p.Id}";
+                var locked = await _lockService.IsLockedAsync(key);
+                businessProduct.Add(new BusinessProductListResponse
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description,
+                    OriginalPrice = p.OriginalPrice,
+                    DiscountedPrice = p.DiscountedPrice,
+                    ImagePath = p.ImagePath,
+                    CategoryName = p.CategoryName,
+                    IsActive = p.IsActive,
+                    IsReserved = locked
+                });
+            }
+            if (products == null)
+                throw new NotFoundException("Hiç ürün bulunamadı.");
+            return products;
+        }
+        public async Task<BusinessProductListResponse> GetProductById(Guid productId)
+        {
+            var p = await _productRepository.GetProductByIdAsync(productId);
+            if (p == null)
+                throw new NotFoundException("Ürün bulunamadı.");
+            var key = $"product:lock:{p.Id}";
+            var locked = await _lockService.IsLockedAsync(key);
+            var businessProduct=new BusinessProductListResponse
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Description = p.Description,
+                OriginalPrice = p.OriginalPrice,
+                DiscountedPrice = p.DiscountedPrice,
+                ImagePath = p.ImagePath,
+                CategoryName = p.CategoryName,
+                IsActive = p.IsActive,
+                IsReserved = locked
+            };
+            return businessProduct;
+        }
     }
+
 }

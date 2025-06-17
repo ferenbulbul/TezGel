@@ -121,7 +121,6 @@ namespace TezGel.Application.Services
 
             return reservation; // Başarılı yanıt
         }
-
         public async Task CompleteReservationAsync(Guid reservationId, Guid businessQrid)
         {
             var business = await _userManager.FindByIdAsync(businessQrid.ToString());
@@ -155,20 +154,40 @@ namespace TezGel.Application.Services
             product.IsActive = false;
             await _productRepo.UpdateAsync(product);
         }
-
-        public async Task<ActionReservation> GetReservationByIdAsync(Guid reservationId)
+        public async Task<RezervationResponseList> GetReservationByIdAsync(Guid reservationId)
         {
-            var reservation = await _resRepo.GetByIdAsync(reservationId);
+            var reservation = await _resRepo.GetReservationByCustomerIdAsync(reservationId);
             if (reservation == null)
                 throw new NotFoundException($"Rezervasyon '{reservationId}' bulunamadı.");
             return reservation;
         }
         public async Task<List<RezervationResponseList>> GetReservationByUserIdAsync(Guid userId)
         {
-            var reservations = await _resRepo.GetReservationsAsync(userId);
-            if (reservations == null || !reservations.Any())
+            var reservations = await _resRepo.GetReservationsByCustomerIdAsync(userId);
+            if (reservations == null)
                 throw new NotFoundException($"Kullanıcı '{userId}' için rezervasyon bulunamadı.");
             return reservations;
+        }
+        public async Task<string> GetReservationStatusAsync(Guid reservationId)
+        {
+            var status = await _resRepo.GetReservationStatusAsync(reservationId);
+            if (status == null)
+                throw new NotFoundException($"Rezervasyon '{reservationId}' bulunamadı.");
+            return status;
+        }
+        public async Task<List<RezervationResponseListBusiness>> GetReservationResponseListBusinessAsync(Guid businessId)
+        {
+            var rezervationResponseLists = await _resRepo.GetReservationsByBusinessIdAsync(businessId);
+            if (rezervationResponseLists == null)
+                throw new NotFoundException($"Business '{businessId}' bulunamadı.");
+            return rezervationResponseLists;
+        }
+        public async Task<RezervationResponseListBusiness> GetReservationBusinessAsync( Guid reservationId)
+        {
+            var rezervationResponseLists = await _resRepo.GetReservationByBusinessIdAsync(reservationId);
+            if (rezervationResponseLists == null)
+                throw new NotFoundException($"Rezervasyon '{ reservationId}' bulunamadı.");
+            return rezervationResponseLists;
         }
     }
 }
